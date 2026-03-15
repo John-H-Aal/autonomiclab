@@ -18,20 +18,7 @@ class GATPlotterPyQtGraph:
 
     @staticmethod
     def _add_hr_variants(plot_widget, plot, dataset, t_start, t_end):
-        """Add HR AP as line and HR ECG (RR-int) as small triangle markers"""
-        # HR AP as line
-        hr_ap_data = dataset.get('HR AP', {})
-        if hr_ap_data:
-            times = np.array(hr_ap_data.get('times', []))
-            values = np.array(hr_ap_data.get('values', []))
-            mask = (times >= t_start) & (times <= t_end)
-            if np.any(mask):
-                pen = pg.mkPen(color='#FF8C00', width=1.5)
-                curve = plot.plot(times[mask], values[mask], pen=pen)
-                plot_widget._plot_curves[id(plot)].append(curve)
-                print("DEBUG: Added HR AP curve")
-
-        # HR ECG (RR-int) as small triangle markers
+        """Add HR ECG (RR-int) as small circle markers when available"""
         hr_ecg_data = dataset.get('HR ECG (RR-int)', {})
         if hr_ecg_data:
             times = np.array(hr_ecg_data.get('times', []))
@@ -44,13 +31,8 @@ class GATPlotterPyQtGraph:
                     symbol='o', symbolSize=5,
                     symbolPen=pg.mkPen(color='#006400', width=1.5),
                     symbolBrush=pg.mkBrush(None),
+                    name='HR ECG (RR-int)',
                 )
-                # Add clean legend entry without symbol dot
-                legend = plot.legend
-                if legend is not None:
-                    sample = pg.PlotDataItem(
-                        pen=pg.mkPen(color='#006400', width=1.5))
-                    legend.addItem(sample, 'HR ECG (RR-int)')
                 plot_widget._plot_curves[id(plot)].append(curve)
                 print("DEBUG: Added HR ECG (RR-int) markers")
 
@@ -79,7 +61,7 @@ class GATPlotterPyQtGraph:
 
         plot1 = plot_widget.addPlot(row=0, col=0, title="Blood Pressure")
         plot2 = plot_widget.addPlot(row=1, col=0, title="Heart Rate")
-        plot3 = plot_widget.addPlot(row=2, col=0, title="Airway / Respiratory")
+        plot3 = plot_widget.addPlot(row=2, col=0, title="Airway")
 
         plot_widget._plot_curves[id(plot1)] = []
         plot_widget._plot_curves[id(plot2)] = []
@@ -126,21 +108,17 @@ class GATPlotterPyQtGraph:
                 pos=marker['time'], angle=90,
                 pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.PenStyle.DashLine)))
 
-        # ── SUBPLOT 3: PAirway + Resp Wave ───────────────────────────────────
+        # ── SUBPLOT 3: PAirway only ──────────────────────────────────────────
         plot3.addLegend(offset=(10, 10))
-        for sig, color, label in [
-            ('PAirway',   '#0078d4', 'PAirway'),
-            ('Resp Wave', '#00008B', 'Resp'),
-        ]:
-            d = dataset.get(sig, {})
-            if d:
-                t = np.array(d.get('times', []))
-                v = np.array(d.get('values', []))
-                if len(t):
-                    curve = plot3.plot(t, v,
-                                       pen=pg.mkPen(color=color, width=1.5), name=label)
-                    plot_widget._plot_curves[id(plot3)].append(curve)
-        plot3.setLabel('left', 'Amplitude')
+        d = dataset.get('PAirway', {})
+        if d:
+            t = np.array(d.get('times', []))
+            v = np.array(d.get('values', []))
+            if len(t):
+                curve = plot3.plot(t, v,
+                                   pen=pg.mkPen(color='#0078d4', width=1.5), name='PAirway')
+                plot_widget._plot_curves[id(plot3)].append(curve)
+        plot3.setLabel('left', 'PAirway (mmHg)')
         plot3.setLabel('bottom', 'Time (s)')
         GATPlotterPyQtGraph._style_plot(plot3)
 
