@@ -1,0 +1,57 @@
+# AutonomicLab Configuration
+
+# Panel Layout
+# left_width: percentage of window width for left panel (rest goes to plots)
+layout:
+  left_width_percent: 15  # Adjust this (10-30%) to change panel split
+
+# Font Configuration
+left_panel:
+  title:
+    size: 16
+    weight: bold
+  button:
+    size: 12
+    weight: bold
+  status:
+    size: 11
+    weight: normal
+  filter_label:
+    size: 16
+    weight: bold
+  filter_combo:
+    size: 16
+    weight: bold
+  table_header:
+    size: 14
+    weight: bold
+  table_content:
+    size: 14
+    weight: normal
+  info_box:
+    size: 14
+    weight: normal
+
+plot_panel:
+  title:
+    size: 15
+    weight: bold
+  ylabel:
+    size: 14
+    weight: bold
+  xlabel:
+    size: 14
+    weight: bold
+  tick_labels:
+    size: 11
+    weight: normal
+  placeholder:
+    size: 14
+    weight: normal
+
+# Mouse Interaction
+mouse:
+  zoom_speed: 1.1  # Scroll wheel: 10% per tick
+  pan_speed: 0.02  # Pan: 2% of time range
+
+ui_zoom: 100
