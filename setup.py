@@ -14,6 +14,10 @@ setup(
         "PyQt6>=6.4.0",
         "numpy>=1.24.0",
         "scipy>=1.10.0",
+        "PyYAML>=6.0",
+        "pyqtgraph>=0.13.0",
+        "openpyxl>=3.1.0",
+        "Pillow>=9.0.0",
     ],
     entry_points={
         "console_scripts": [
