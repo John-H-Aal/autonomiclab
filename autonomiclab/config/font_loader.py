@@ -1,5 +1,6 @@
 """Load and manage font configuration from YAML"""
 
+import logging
 from pathlib import Path
 import yaml
 
@@ -21,10 +22,9 @@ class FontLoader:
         try:
             with open(cls.CONFIG_PATH, 'r', encoding='utf-8') as f:
                 cls._config = yaml.safe_load(f)
-                cls._ui_zoom = cls._config.get('ui_zoom', 100)
                 return cls._config
         except FileNotFoundError:
-            print(f"Font config not found at {cls.CONFIG_PATH}")
+            logging.warning("Font config not found at %s", cls.CONFIG_PATH)
             cls._config = cls._default_config()
             return cls._config
     
@@ -56,7 +56,6 @@ class FontLoader:
                 'zoom_speed': 1.1,
                 'pan_speed': 0.02
             },
-            'ui_zoom': 100
         }
     
     @classmethod
@@ -106,13 +105,5 @@ class FontLoader:
     
     @classmethod
     def save_zoom(cls, zoom_percent: int):
-        """Save zoom to config file"""
+        """Update in-memory zoom (persisted via AppSettings)."""
         cls._ui_zoom = zoom_percent
-        config = cls.load()
-        config['ui_zoom'] = zoom_percent
-        
-        try:
-            with open(cls.CONFIG_PATH, 'w', encoding='utf-8') as f:
-                yaml.dump(config, f, default_flow_style=False)
-        except Exception as e:
-            print(f"Could not save zoom config: {e}")

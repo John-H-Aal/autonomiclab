@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -16,6 +19,17 @@ class Signal:
     times: np.ndarray
     values: np.ndarray
     unit: str = ""
+
+    def __post_init__(self) -> None:
+        nt, nv = len(self.times), len(self.values)
+        if nt != nv:
+            n = min(nt, nv)
+            _log.warning(
+                "Signal '%s': times(%d) vs values(%d) length mismatch — truncating to %d",
+                self.name, nt, nv, n,
+            )
+            self.times  = self.times[:n]
+            self.values = self.values[:n]
 
     @property
     def t_start(self) -> float:

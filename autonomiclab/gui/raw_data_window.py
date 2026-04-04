@@ -75,7 +75,7 @@ class RawDataWindow(QDialog):
                 continue
             cb = QCheckBox(grp_key)
             cb.setChecked(default_on)
-            cb.stateChanged.connect(self._rebuild)
+            cb.stateChanged.connect(lambda _: self._rebuild())
             pl.addWidget(cb)
             self._group_cbs[grp_key] = cb
 
@@ -87,7 +87,7 @@ class RawDataWindow(QDialog):
             for sig_name, _ in self._ecg_avail:
                 cb = QCheckBox(sig_name)
                 cb.setChecked(sig_name in self._ECG_DEFAULT_ON)
-                cb.stateChanged.connect(self._rebuild)
+                cb.stateChanged.connect(lambda _: self._rebuild())
                 pl.addWidget(cb)
                 self._ecg_cbs[sig_name] = cb
 
@@ -99,7 +99,7 @@ class RawDataWindow(QDialog):
             pl.addWidget(QLabel("<b>Derived</b>"))
             self._ptt_cb = QCheckBox("PTT (ms)")
             self._ptt_cb.setChecked(False)
-            self._ptt_cb.stateChanged.connect(self._rebuild)
+            self._ptt_cb.stateChanged.connect(lambda _: self._rebuild())
             pl.addWidget(self._ptt_cb)
 
         # Signal info
@@ -190,7 +190,6 @@ class RawDataWindow(QDialog):
 
             row = len(plots)
             plot = self._gw.addPlot(row=row, col=0, title=grp_key)
-            plot.setMinimumHeight(130)
             plot.showGrid(x=True, y=True, alpha=0.3)
             plot.setLabel("left", grp_label)
             plot.addLegend(offset=(10, 10))
@@ -233,10 +232,19 @@ class RawDataWindow(QDialog):
 
             row = len(plots)
             plot = self._gw.addPlot(row=row, col=0, title=sig_name)
-            plot.setMinimumHeight(120)
             plot.showGrid(x=True, y=True, alpha=0.3)
             plot.setLabel("left", "mV")
             plot.plot(sig.times, sig.values, pen=pg.mkPen(color=color, width=1))
+
+            if len(self._rr_times):
+                peak_y = np.interp(self._rr_times, sig.times, sig.values)
+                markers = pg.ScatterPlotItem(
+                    self._rr_times, peak_y,
+                    pen=pg.mkPen("#CC0000", width=1),
+                    brush=pg.mkBrush("#CC000033"),
+                    size=6,
+                )
+                plot.addItem(markers, ignoreBounds=True)
 
             if len(sig.values):
                 v_min, v_max = float(sig.values.min()), float(sig.values.max())
@@ -246,11 +254,6 @@ class RawDataWindow(QDialog):
                 plot.getAxis("left").setTickSpacing(
                     major=round(span / 4, 4), minor=round(span / 20, 4))
 
-            if len(self._rr_times):
-                peak_y = np.interp(self._rr_times, sig.times, sig.values)
-                plot.plot(self._rr_times, peak_y, pen=None, symbol="o", symbolSize=6,
-                          symbolPen=pg.mkPen("#CC0000", width=1),
-                          symbolBrush=pg.mkBrush("#CC000033"))
             plots.append(plot)
 
         # ── PTT ───────────────────────────────────────────────────────────────
@@ -264,7 +267,6 @@ class RawDataWindow(QDialog):
                                    for i in range(len(t_ap))])
                 row = len(plots)
                 plot = self._gw.addPlot(row=row, col=0, title="PTT")
-                plot.setMinimumHeight(120)
                 plot.showGrid(x=True, y=True, alpha=0.3)
                 plot.setLabel("left", "PTT (ms)")
                 plot.plot(t_ap, ptt_ms, pen=pg.mkPen(color="#555555", width=1.5))

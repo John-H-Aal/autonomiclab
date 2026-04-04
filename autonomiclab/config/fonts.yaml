@@ -53,5 +53,3 @@ plot_panel:
 mouse:
   zoom_speed: 1.1  # Scroll wheel: 10% per tick
   pan_speed: 0.02  # Pan: 2% of time range
-
-ui_zoom: 100

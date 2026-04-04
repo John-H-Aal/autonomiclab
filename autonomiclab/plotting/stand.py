@@ -31,6 +31,7 @@ class StandPlotter:
         result: StandResult,
         t_start: float,
         t_end: float,
+        **_kwargs,
     ) -> None:
         log.debug("StandPlotter.plot called")
         plot_widget.clear()
