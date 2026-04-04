@@ -244,8 +244,6 @@ class RawDataWindow(QDialog):
                               symbolPen=pg.mkPen(color, width=1),
                               symbolBrush=pg.mkBrush(color))
                 elif grp_key == 'HR' and sig_key == 'HR AP':
-                    # Store HR AP times for reBAP markers
-                    self._hr_ap_times = t
                     plot.plot(t, v, pen=pg.mkPen(color=color, width=1.5),
                               name=leg_name)
                     plot.plot(t, v, pen=None, symbol='o', symbolSize=4,

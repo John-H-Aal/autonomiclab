@@ -961,7 +961,7 @@ class GATPlotterPyQtGraph:
                               pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.PenStyle.DashLine)))
 
         # ===== ROW 1: QTableWidget via GraphicsProxyWidget =====
-        from pyqtgraph.Qt import QtWidgets, QtCore
+        from pyqtgraph.Qt import QtWidgets
         table_widget = QtWidgets.QTableWidget()
         table_widget.setColumnCount(7)
         table_widget.setHorizontalHeaderLabels(['#', 'HR max', 't max (s)', 'HR min', 't min (s)', 'ΔHR', 'Top 6'])
@@ -1200,7 +1200,7 @@ class GATPlotterPyQtGraph:
         # ===== EXPORT PNG + XLSX =====
         if output_dir and _export_rsa is not None:
             import os, pathlib
-            from pyqtgraph.Qt import QtWidgets, QtCore, QtGui
+            from pyqtgraph.Qt import QtWidgets
 
             out = pathlib.Path(output_dir)
             folder_prefix = out.name  # e.g. "2026-02-02_10.33.58"
@@ -1336,4 +1336,4 @@ class GATPlotterPyQtGraph:
             wb.save(str(xlsx_path))
             print(f"DEBUG: saved XLSX → {xlsx_path}")
 
-        print("DEBUG: create_deep_breathing_plot complete")
+        print("DEBUG: create_deep_breathing_plot complete") 

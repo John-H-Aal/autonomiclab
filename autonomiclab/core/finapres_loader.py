@@ -1,6 +1,5 @@
 """Load Finapres CSV files"""
 from pathlib import Path
-import re
 
 def detect_datetime_prefix(data_dir):
     """Auto-detect datetime prefix from first CSV file"""
