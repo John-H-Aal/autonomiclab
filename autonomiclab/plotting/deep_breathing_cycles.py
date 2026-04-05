@@ -7,13 +7,12 @@ whenever cycles change.
 
 from __future__ import annotations
 
-from typing import Callable
-
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 from autonomiclab.analysis.deep_breathing import DeepBreathingResult, RSACycle
+from autonomiclab.core.protocols import CycleOverrideCallback
 
 _C_INSP   = "#B71C1C"   # dark red  — HR max (inspiration)
 _C_EXP    = "#1A237E"   # dark blue — HR min (expiration)
@@ -46,7 +45,7 @@ class CycleInteractor:
         result: DeepBreathingResult,
         t_hr: np.ndarray,
         v_hr: np.ndarray,
-        on_cycle_override: Callable[[list[dict]], None],
+        on_cycle_override: CycleOverrideCallback,
     ) -> None:
         self._plot = plot
         self._result = result

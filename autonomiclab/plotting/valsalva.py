@@ -10,6 +10,7 @@ import pyqtgraph as pg
 
 from autonomiclab.analysis.valsalva import ValsalvaResult
 from autonomiclab.core.models import Dataset
+from autonomiclab.core.protocols import BaselineOverrideCallback, PointOverrideCallback
 from autonomiclab.plotting.helpers import (
     add_dot, add_draggable_dot, add_hline_seg, add_label, add_marker_vlines,
     add_vline, add_vline_seg, shade_region, style_plot, add_hr_ecg_markers,
@@ -56,8 +57,8 @@ class ValsalvaPlotter:
         result: ValsalvaResult,
         t_start: float,
         t_end: float,
-        on_manual_override: Optional[object] = None,
-        on_point_override: Optional[object] = None,
+        on_manual_override: Optional[BaselineOverrideCallback] = None,
+        on_point_override: Optional[PointOverrideCallback] = None,
     ) -> None:
         log.debug("ValsalvaPlotter.plot called")
         plot_widget.clear()
@@ -139,7 +140,7 @@ class ValsalvaPlotter:
         plot_pa: pg.PlotItem,
         dataset: Dataset,
         r: ValsalvaResult,
-        on_manual_override: Optional[object] = None,
+        on_manual_override: Optional[BaselineOverrideCallback] = None,
     ) -> None:
         # Store on self so the instance (and its signal connections) is not
         # garbage-collected before the user interacts with the plot.
@@ -222,8 +223,8 @@ class ValsalvaPlotter:
         plot_pa: pg.PlotItem,
         dataset: Dataset,
         r: ValsalvaResult,
-        on_manual_override: Optional[object] = None,
-        on_point_override: Optional[object] = None,
+        on_manual_override: Optional[BaselineOverrideCallback] = None,
+        on_point_override: Optional[PointOverrideCallback] = None,
         t_start: float = None,
         t_end: float = None,
     ) -> None:

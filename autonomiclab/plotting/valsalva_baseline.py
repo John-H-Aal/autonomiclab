@@ -7,12 +7,13 @@ updates happen inside this class; the caller only needs to instantiate it.
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Optional
 
 import numpy as np
 import pyqtgraph as pg
 
 from autonomiclab.analysis.valsalva import ValsalvaAnalyzer, ValsalvaResult
+from autonomiclab.core.protocols import BaselineOverrideCallback
 from autonomiclab.core.models import Dataset
 from autonomiclab.plotting.helpers import shade_region
 
@@ -47,7 +48,7 @@ class BaselineRegionInteractor:
         plot_pa: pg.PlotItem,
         dataset: Dataset,
         result: ValsalvaResult,
-        on_changed: Optional[Callable[[float, float], None]] = None,
+        on_changed: Optional[BaselineOverrideCallback] = None,
     ) -> None:
         self._plot_bp = plot_bp
         self._r = result

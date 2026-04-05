@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import numpy as np
 import pyqtgraph as pg
 
 from autonomiclab.analysis.deep_breathing import DeepBreathingResult, RSACycle
 from autonomiclab.core.models import Dataset
+from autonomiclab.core.protocols import CycleOverrideCallback
 from autonomiclab.plotting.deep_breathing_cycles import CycleInteractor
 from autonomiclab.plotting.helpers import add_marker_vlines, style_plot
 from autonomiclab.utils.logger import get_logger
@@ -31,7 +32,7 @@ class DeepBreathingPlotter:
         result: DeepBreathingResult,
         t_start: float,
         t_end: float,
-        on_cycle_override: Optional[Callable] = None,
+        on_cycle_override: Optional[CycleOverrideCallback] = None,
     ) -> None:
         log.debug("DeepBreathingPlotter.plot called")
         plot_widget.clear()
@@ -133,7 +134,7 @@ class DeepBreathingPlotter:
         result: DeepBreathingResult,
         t_hr: np.ndarray,
         v_hr: np.ndarray,
-        on_cycle_override: Callable,
+        on_cycle_override: CycleOverrideCallback,
     ) -> None:
         # Store on self so the instance (and its signal connections) is not
         # garbage-collected before the user interacts with the plot.
