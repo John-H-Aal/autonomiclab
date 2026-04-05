@@ -118,7 +118,60 @@ class DeepBreathingAnalyzer:
         if not cycles:
             return result
 
+        self._recompute_stats(result)
+
+        log.info(
+            "RSA mean ΔHR: all=%.1f  top%d=%.1f bpm",
+            result.avg_rsa_all, result.n_sel, result.avg_rsa_top6,
+        )
+        return result
+
+    def apply_cycle_overrides(
+        self,
+        result: DeepBreathingResult,
+        dataset: Dataset,
+        stored_cycles: list[dict],
+    ) -> None:
+        """Replace auto-detected cycles with manually overridden ones and recompute stats.
+
+        ``stored_cycles`` is a list of dicts with keys:
+        ``cycle, max_t, min_t``  (values are snapped to the actual HR signal).
+        """
+        hr = dataset.get_signal("HR")
+        if not hr:
+            return
+        t_hr = np.asarray(hr.times)
+        v_hr = np.asarray(hr.values)
+
+        def _snap(t: float) -> tuple[float, float]:
+            i = int(np.argmin(np.abs(t_hr - t)))
+            return float(t_hr[i]), float(v_hr[i])
+
+        cycles: list[RSACycle] = []
+        for i, d in enumerate(stored_cycles, start=1):
+            max_t, max_v = _snap(d["max_t"])
+            min_t, min_v = _snap(d["min_t"])
+            cycles.append(RSACycle(
+                cycle=i,
+                max_t=max_t, max_v=max_v,
+                min_t=min_t, min_v=min_v,
+                rsa=max_v - min_v,
+            ))
+
+        result.cycles = cycles
+        self._recompute_stats(result)
+
+    @staticmethod
+    def _recompute_stats(result: DeepBreathingResult) -> None:
+        """Recompute top-6, means and averages from result.cycles in place."""
         valid = result.valid_cycles
+        if not valid:
+            result.top6 = set()
+            result.n_sel = result.avg_rsa_all = result.avg_rsa_top6 = 0.0
+            result.mean_max_all = result.mean_min_all = 0.0
+            result.mean_max_top = result.mean_min_top = 0.0
+            return
+
         top6_set = {
             c.cycle for c in sorted(valid, key=lambda x: x.rsa, reverse=True)[:N_SELECT]
         }
@@ -127,15 +180,9 @@ class DeepBreathingAnalyzer:
 
         result.top6         = top6_set
         result.n_sel        = n_sel
-        result.avg_rsa_all  = float(np.mean([c.rsa for c in valid])) if valid else 0.0
+        result.avg_rsa_all  = float(np.mean([c.rsa for c in valid]))
         result.avg_rsa_top6 = float(np.mean([c.rsa for c in top6_cycles])) if top6_cycles else 0.0
-        result.mean_max_all = float(np.mean([c.max_v for c in valid])) if valid else 0.0
-        result.mean_min_all = float(np.mean([c.min_v for c in valid])) if valid else 0.0
+        result.mean_max_all = float(np.mean([c.max_v for c in valid]))
+        result.mean_min_all = float(np.mean([c.min_v for c in valid]))
         result.mean_max_top = float(np.mean([c.max_v for c in top6_cycles])) if top6_cycles else 0.0
         result.mean_min_top = float(np.mean([c.min_v for c in top6_cycles])) if top6_cycles else 0.0
-
-        log.info(
-            "RSA mean ΔHR: all=%.1f  top%d=%.1f bpm",
-            result.avg_rsa_all, n_sel, result.avg_rsa_top6,
-        )
-        return result

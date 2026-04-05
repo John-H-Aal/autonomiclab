@@ -11,8 +11,8 @@ import pyqtgraph as pg
 from autonomiclab.analysis.valsalva import ValsalvaResult
 from autonomiclab.core.models import Dataset
 from autonomiclab.plotting.helpers import (
-    add_dot, add_hline_seg, add_label, add_marker_vlines, add_vline,
-    add_vline_seg, shade_region, style_plot, add_hr_ecg_markers,
+    add_dot, add_draggable_dot, add_hline_seg, add_label, add_marker_vlines,
+    add_vline, add_vline_seg, shade_region, style_plot, add_hr_ecg_markers,
 )
 from autonomiclab.utils.logger import get_logger
 
@@ -23,15 +23,15 @@ _FILL = {
     "baseline":     (232, 244, 232, 130),
     "anticipatory": (255, 255, 255,   0),
     "S1":           (255, 243, 224, 120),
-    "S2early":      (255, 235, 238, 120),
-    "S2late":       (255, 235, 238, 120),
-    "S3":           (237, 231, 246, 110),
-    "S4":           (224, 247, 250, 110),
+    "S2early":      (255, 205, 215, 140),
+    "S2late":       (255, 160, 180, 150),
+    "S3":           (195, 170, 235, 150),
+    "S4":           (155, 220, 240, 150),
 }
 _BL   = "#2e7d32"
 _PI   = "#e65100"
 _PII  = "#c62828"
-_PIII = "#283593"
+_PIII = "#6a1b9a"
 _PIV  = "#006064"
 
 _DashLine  = pg.QtCore.Qt.PenStyle.DashLine
@@ -55,7 +55,8 @@ class ValsalvaPlotter:
         result: ValsalvaResult,
         t_start: float,
         t_end: float,
-        output_dir: Optional[Path] = None,
+        on_manual_override: Optional[object] = None,
+        on_point_override: Optional[object] = None,
     ) -> None:
         log.debug("ValsalvaPlotter.plot called")
         plot_widget.clear()
@@ -113,20 +114,262 @@ class ValsalvaPlotter:
         style_plot(plot3)
         add_marker_vlines(plot3, dataset.markers, t_start, t_end)
 
-        plot1.setXRange(t_start, t_end)
-
         # ── draw analysis annotations ─────────────────────────────────────────
-        self._draw_annotations(plot1, plot2, plot3, dataset, result)
+        self._draw_annotations(plot1, plot2, plot3, dataset, result,
+                               on_manual_override, on_point_override,
+                               t_start=t_start, t_end=t_end)
 
-        # Zoom to analysis window
-        if result.t_S1s and result.t_S4e:
-            plot1.setXRange(result.t_S1s - 60, result.t_S4e + 15)
-
-        # ── export ────────────────────────────────────────────────────────────
-        if output_dir:
-            self._export(plot_widget, plot1, plot2, plot3, result, output_dir)
+        # Zoom to analysis window — use the best available right-hand anchor
+        # (t_S4e may be None when Phase IV is suppressed due to calibration)
+        _zoom_end = (
+            result.t_S4e                          # normal case
+            or (result.t_S3s + 45 if result.t_S3s else None)  # PIV suppressed
+            or (result.t_S3e + 45 if result.t_S3e else None)  # fallback
+        )
+        if result.t_S1s and _zoom_end:
+            plot1.setXRange(result.t_S1s - 60, _zoom_end + 15)
 
         log.debug("ValsalvaPlotter complete")
+
+    def _add_baseline_region(
+        self,
+        plot_bp: pg.PlotItem,
+        plot_hr: pg.PlotItem,
+        plot_pa: pg.PlotItem,
+        dataset: Dataset,
+        r: ValsalvaResult,
+        on_manual_override: Optional[object] = None,
+    ) -> None:
+        """Interactive baseline region on BP with live-linked shades and derived values."""
+        if r.t_bl_s is None or r.t_bl_e is None:
+            return
+
+        sys_sig = dataset.get_signal("reSYS")
+        if not sys_sig:
+            # Fall back to static drawing
+            for p in (plot_bp, plot_hr, plot_pa):
+                shade_region(p, r.t_bl_s, r.t_bl_e, _FILL["baseline"])
+            add_vline(plot_bp, r.t_bl_s, _BL)
+            add_vline(plot_bp, r.t_bl_e, _BL)
+            return
+
+        t_sys_arr = np.asarray(sys_sig.times)
+        v_sys_arr = np.asarray(sys_sig.values)
+        ri, gi, bi, ai = _FILL["baseline"]
+
+        # ── interactive region on BP (drag-whole or drag-edge) ────────────────
+        _brush = pg.mkBrush(ri, gi, bi, ai + 30)
+        region = pg.LinearRegionItem(
+            values=(r.t_bl_s, r.t_bl_e),
+            orientation="vertical",
+            brush=_brush,
+            pen=pg.mkPen(color=_BL, width=2),
+            movable=True,
+        )
+        region.setHoverBrush(_brush)   # suppress opacity change on mouse-over
+        region.setZValue(10)   # above ViewBox so it wins mouse events
+        plot_bp.addItem(region, ignoreBounds=True)
+
+        # ── width label (top-centre of region, updated live) ──────────────────
+        width_lbl = pg.TextItem(
+            f"{r.t_bl_e - r.t_bl_s:.1f} s",
+            color=_BL,
+            anchor=(0.5, 0.0),   # top-centre of text at the given position
+        )
+        width_lbl.setZValue(11)
+        plot_bp.addItem(width_lbl, ignoreBounds=True)
+
+        def _update_width_lbl(t0: float, t1: float) -> None:
+            yr = plot_bp.viewRange()[1]
+            y_inset = yr[1] - (yr[1] - yr[0]) * 0.04   # 4 % below the top edge
+            width_lbl.setPos((t0 + t1) / 2, y_inset)
+            width_lbl.setText(f"{t1 - t0:.1f} s")
+
+        _update_width_lbl(r.t_bl_s, r.t_bl_e)
+
+        # ── linked static shades on HR and PA ─────────────────────────────────
+        def _linked_shade(plot: pg.PlotItem) -> pg.LinearRegionItem:
+            sh = pg.LinearRegionItem(
+                values=(r.t_bl_s, r.t_bl_e),
+                orientation="vertical",
+                brush=pg.mkBrush(ri, gi, bi, ai),
+                pen=pg.mkPen(None),
+                movable=False,
+            )
+            sh.setZValue(-10)
+            plot.addItem(sh)
+            return sh
+
+        bl_hr = _linked_shade(plot_hr)
+        bl_pa = _linked_shade(plot_pa)
+
+        # ── updatable avg_sbp line and boundary vlines on BP ──────────────────
+        sbp_hline = pg.InfiniteLine(
+            pos=r.avg_sbp or 0, angle=0,
+            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
+        )
+        vline_s = pg.InfiniteLine(
+            pos=r.t_bl_s, angle=90,
+            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
+        )
+        vline_e = pg.InfiniteLine(
+            pos=r.t_bl_e, angle=90,
+            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
+        )
+        plot_bp.addItem(sbp_hline)
+        plot_bp.addItem(vline_s)
+        plot_bp.addItem(vline_e)
+
+        from autonomiclab.analysis.valsalva import ValsalvaAnalyzer
+
+        # ── A bracket (updatable) on BP ────────────────────────────────────────
+        a_seg: Optional[pg.PlotDataItem] = None
+        a_lbl: Optional[pg.TextItem] = None
+        if r.t_S2es and r.v_nadir is not None and r.avg_sbp and r.A is not None:
+            a_seg = pg.PlotDataItem(
+                x=[r.t_S2es, r.t_S2es], y=[r.v_nadir, r.avg_sbp],
+                pen=pg.mkPen(color=_PII, width=2, style=_DashLine),
+            )
+            plot_bp.addItem(a_seg)
+            a_lbl = pg.TextItem(f"A={r.A:.0f}", color=_PII, anchor=(0.5, 1.0))
+            a_lbl.setPos(r.t_S2es, r.avg_sbp)
+            plot_bp.addItem(a_lbl)
+
+        # ── PRT annotation (updatable) on BP ───────────────────────────────────
+        prt_dot = pg.ScatterPlotItem(
+            x=[r.t_prt_end] if r.t_prt_end else [],
+            y=[r.avg_sbp]   if r.t_prt_end else [],
+            size=8, symbol="o",
+            pen=pg.mkPen(_PIII, width=1.5), brush=pg.mkBrush(_PIII),
+        )
+        prt_hline = pg.PlotDataItem(
+            x=[r.t_S3e, r.t_prt_end] if (r.t_S3e and r.t_prt_end) else [],
+            y=[r.avg_sbp, r.avg_sbp]  if (r.t_S3e and r.t_prt_end) else [],
+            pen=pg.mkPen(color=_PIII, width=2, style=_SolidLine),
+        )
+        prt_lbl = pg.TextItem(
+            f"PRT={r.PRT:.1f}s" if r.PRT else "", color=_PIII, anchor=(0.5, 1.0)
+        )
+        if r.t_prt_end and r.t_S3e and r.avg_sbp:
+            prt_lbl.setPos((r.t_S3e + r.t_prt_end) / 2, r.avg_sbp - 2)
+        plot_bp.addItem(prt_dot)
+        plot_bp.addItem(prt_hline)
+        plot_bp.addItem(prt_lbl)
+
+        # ── live callback ──────────────────────────────────────────────────────
+        def _on_region_changed() -> None:
+            t0, t1 = region.getRegion()
+            r.t_bl_s, r.t_bl_e = t0, t1
+
+            vline_s.setValue(t0)
+            vline_e.setValue(t1)
+            bl_hr.setRegion((t0, t1))
+            bl_pa.setRegion((t0, t1))
+            _update_width_lbl(t0, t1)
+
+            mask = (t_sys_arr >= t0) & (t_sys_arr <= t1)
+            if not np.any(mask):
+                return
+            r.avg_sbp = float(np.mean(v_sys_arr[mask]))
+            sbp_hline.setValue(r.avg_sbp)
+
+            # A
+            if r.v_nadir is not None:
+                r.A = r.avg_sbp - r.v_nadir
+            if a_seg is not None and r.t_S2es:
+                a_seg.setData(x=[r.t_S2es, r.t_S2es], y=[r.v_nadir, r.avg_sbp])
+            if a_lbl is not None and r.t_S2es and r.v_nadir is not None:
+                a_lbl.setPos(r.t_S2es, r.avg_sbp)
+                a_lbl.setText(f"A={r.A:.0f}" if r.A is not None else "")
+
+            # PRT
+            if r.t_S3e:
+                r.t_prt_end, r.PRT = ValsalvaAnalyzer._compute_prt(
+                    t_sys_arr, v_sys_arr, r.t_S3e, r.avg_sbp
+                )
+            if r.t_prt_end and r.t_S3e:
+                prt_dot.setData(x=[r.t_prt_end], y=[r.avg_sbp])
+                prt_hline.setData(
+                    x=[r.t_S3e, r.t_prt_end], y=[r.avg_sbp, r.avg_sbp]
+                )
+                prt_lbl.setPos((r.t_S3e + r.t_prt_end) / 2, r.avg_sbp - 2)
+                prt_lbl.setText(f"PRT={r.PRT:.1f}s" if r.PRT else "PRT")
+
+            # BRSa
+            if r.A is not None and r.B is not None and r.PRT and r.PRT > 0:
+                r.BRSa = (r.A + r.B * 0.75) / r.PRT
+
+            if on_manual_override is not None:
+                on_manual_override(r.t_bl_s, r.t_bl_e)
+
+        region.sigRegionChanged.connect(_on_region_changed)
+
+    # ── calibration warning overlay ───────────────────────────────────────────
+
+    @staticmethod
+    def _draw_cal_warnings(
+        plot_bp: pg.PlotItem,
+        dataset: Dataset,
+        r: ValsalvaResult,
+        t_start: float = None,
+        t_end: float = None,
+    ) -> None:
+        """Shade calibration-active periods and show a warning banner on BP plot."""
+        cal_sig = dataset.get_signal("PhysioCalActive")
+        _CAL_BRUSH  = pg.mkBrush(255, 200, 0, 80)   # amber, semi-transparent
+        _CAL_PEN    = pg.mkPen(color="#b8860b", width=1, style=pg.QtCore.Qt.PenStyle.DashLine)
+        _WARN_COLOR = "#b8400b"
+
+        # Shade calibration bursts — restricted to the analysis window so bursts
+        # from the rest of the recording do not clutter the zoomed view.
+        if cal_sig is not None:
+            t_c, v_c = cal_sig.times, cal_sig.values
+            # Restrict to analysis window if provided
+            if t_start is not None and t_end is not None:
+                mask = (t_c >= t_start) & (t_c <= t_end)
+                t_c, v_c = t_c[mask], v_c[mask]
+
+            in_burst = False
+            t_burst_start = None
+            for t, v in zip(t_c, v_c):
+                if v > 0.5 and not in_burst:
+                    in_burst = True
+                    t_burst_start = t
+                elif v <= 0.5 and in_burst:
+                    in_burst = False
+                    region = pg.LinearRegionItem(
+                        values=(t_burst_start, t),
+                        orientation="vertical",
+                        brush=_CAL_BRUSH,
+                        pen=_CAL_PEN,
+                        movable=False,
+                    )
+                    region.setZValue(5)
+                    plot_bp.addItem(region)
+            # Close any open burst at end of window
+            if in_burst and t_burst_start is not None:
+                region = pg.LinearRegionItem(
+                    values=(t_burst_start, float(t_c[-1])),
+                    orientation="vertical",
+                    brush=_CAL_BRUSH,
+                    pen=_CAL_PEN,
+                    movable=False,
+                )
+                region.setZValue(5)
+                plot_bp.addItem(region)
+
+        # Warning banner top-left of BP plot listing affected regions
+        regions_str = " · ".join(r.cal_warnings)
+        banner = pg.TextItem(
+            f"⚠ Finapres calibration: {regions_str}",
+            color=_WARN_COLOR,
+            anchor=(0.0, 0.0),
+        )
+        banner.setZValue(20)
+        yr = plot_bp.viewRange()[1]
+        xr = plot_bp.viewRange()[0]
+        banner.setPos(xr[0], yr[1])
+        plot_bp.addItem(banner, ignoreBounds=True)
 
     def _draw_annotations(
         self,
@@ -135,10 +378,20 @@ class ValsalvaPlotter:
         plot_pa: pg.PlotItem,
         dataset: Dataset,
         r: ValsalvaResult,
+        on_manual_override: Optional[object] = None,
+        on_point_override: Optional[object] = None,
+        t_start: float = None,
+        t_end: float = None,
     ) -> None:
-        # Phase boxes on all three subplots
+        # ── Finapres calibration warnings ─────────────────────────────────────
+        if r.cal_warnings:
+            self._draw_cal_warnings(plot_bp, dataset, r, t_start=t_start, t_end=t_end)
+
+        # Baseline: interactive region handles shade, vlines, avg_sbp line, A bracket
+        self._add_baseline_region(plot_bp, plot_hr, plot_pa, dataset, r, on_manual_override)
+
+        # Remaining static phase shades
         for p in (plot_bp, plot_hr, plot_pa):
-            shade_region(p, r.t_bl_s,  r.t_bl_e,  _FILL["baseline"])
             shade_region(p, r.t_bl_e,  r.t_S1s,   _FILL["anticipatory"])
             shade_region(p, r.t_S1s,   r.t_S1e,   _FILL["S1"])
             shade_region(p, r.t_S1e,   r.t_S2es,  _FILL["S2early"])
@@ -146,78 +399,130 @@ class ValsalvaPlotter:
             shade_region(p, r.t_S3s,   r.t_S3e,   _FILL["S3"])
             shade_region(p, r.t_S3e,   r.t_S4e,   _FILL["S4"])
 
-        # Baseline SBP horizontal
-        if r.avg_sbp is not None:
-            plot_bp.addItem(pg.InfiniteLine(
-                pos=r.avg_sbp, angle=0,
-                pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine)))
+        # ── helper: build on_moved callback for a named field ─────────────────
+        def _cb(field: str):
+            if on_point_override is None:
+                return lambda t: None
+            return lambda t, f=field: on_point_override(f, t)
 
-        # Points #1/#2 baseline boundaries
-        add_vline(plot_bp, r.t_bl_s, _BL)
-        add_vline(plot_bp, r.t_bl_e, _BL)
+        # Fetch signal arrays once for draggable dots
+        _sys = dataset.get_signal("reSYS")
+        _hr  = dataset.get_signal("HR")
+        _t_sys = np.asarray(_sys.times)  if _sys else np.array([])
+        _v_sys = np.asarray(_sys.values) if _sys else np.array([])
+        _t_hr  = np.asarray(_hr.times)   if _hr  else np.array([])
+        _v_hr  = np.asarray(_hr.values)  if _hr  else np.array([])
 
-        # Point #3 S1 start
+        # Point #3 S1 start (static vline — PAirway-derived, less useful to move)
         for p in (plot_bp, plot_hr, plot_pa):
             add_vline(p, r.t_S1s, _PI, width=2)
 
-        # Point #4 S1 end dot
-        add_dot(plot_bp, r.t_S1e, self._sys_at(dataset, r.t_S1e), _PI)
+        # Point #4 S1 end — draggable on BP (Phase I / IIe boundary)
+        if r.t_S1e is not None and len(_t_sys):
+            add_draggable_dot(
+                plot_bp, r.t_S1e, _t_sys, _v_sys, _PI, _cb("t_S1e"),
+                t_min=r.t_S1s, t_max=r.t_S3s,
+            )
+        else:
+            add_dot(plot_bp, r.t_S1e, self._sys_at(dataset, r.t_S1e), _PI)
 
-        # Point #5 IIe nadir + A bracket
-        if r.t_S2es and r.v_nadir is not None:
+        # Point #5 IIe nadir — draggable on BP (A bracket drawn in _add_baseline_region)
+        if r.t_S2es is not None and r.v_nadir is not None and len(_t_sys):
+            add_draggable_dot(
+                plot_bp, r.t_S2es, _t_sys, _v_sys, _PII, _cb("t_S2es"),
+                t_min=r.t_S1e, t_max=r.t_S3s,
+            )
+        elif r.t_S2es and r.v_nadir is not None:
             add_dot(plot_bp, r.t_S2es, r.v_nadir, _PII)
-            if r.avg_sbp and r.A is not None:
-                add_vline_seg(plot_bp, r.t_S2es, r.v_nadir, r.avg_sbp, _PII, _DashLine)
-                add_label(plot_bp, r.t_S2es - 1.5, (r.v_nadir + r.avg_sbp) / 2,
-                          f"A={r.A:.0f}", _PII, anchor=(1.0, 0.5))
 
-        # Point #6 S2late max dot
-        add_dot(plot_bp, r.t_S2lmax, r.v_S2lmax, _PI)
+        # Point #6 S2late max — draggable on BP
+        if r.t_S2lmax is not None and r.v_S2lmax is not None and len(_t_sys):
+            add_draggable_dot(
+                plot_bp, r.t_S2lmax, _t_sys, _v_sys, _PI, _cb("t_S2lmax"),
+                t_min=r.t_S2es, t_max=r.t_S3s,
+            )
+        else:
+            add_dot(plot_bp, r.t_S2lmax, r.v_S2lmax, _PI)
 
-        # Point #7 S3 start
+        # Point #7 S3 start (strain release) — static vlines on all 3 panels
         for p in (plot_bp, plot_hr, plot_pa):
             add_vline(p, r.t_S3s, _PIII, width=2)
 
-        # Point #8 S3 min + B bracket
-        if r.t_S3e and r.v_S3min is not None:
+        # Point #8 S3 min (PRT anchor) — draggable on BP
+        if r.t_S3e is not None and r.v_S3min is not None and len(_t_sys):
+            add_draggable_dot(
+                plot_bp, r.t_S3e, _t_sys, _v_sys, _PIII, _cb("t_S3e"),
+                t_min=r.t_S3s,
+            )
+        elif r.t_S3e and r.v_S3min is not None:
             add_dot(plot_bp, r.t_S3e, r.v_S3min, _PIII)
-            if r.t_S2lmax and r.v_S2lmax and r.B is not None:
-                t_b = (r.t_S3s - 2.0) if r.t_S3s else (r.t_S2lmax + r.t_S3e) / 2
-                add_hline_seg(plot_bp, r.t_S2lmax, t_b, r.v_S2lmax, _PI)
-                add_hline_seg(plot_bp, r.t_S2lmax, t_b, r.v_S3min,  _PIII)
-                add_vline_seg(plot_bp, t_b, r.v_S3min, r.v_S2lmax, _PIII)
-                add_label(plot_bp, t_b - 0.5, (r.v_S2lmax + r.v_S3min) / 2,
-                          f"B={r.B:.0f}", _PIII, anchor=(1.0, 0.5))
 
-        # Point #9 PRT
-        if r.t_prt_end and r.t_S3e and r.avg_sbp:
-            add_dot(plot_bp, r.t_prt_end, r.avg_sbp, _PIII)
-            add_hline_seg(plot_bp, r.t_S3e, r.t_prt_end, r.avg_sbp, _PIII, _SolidLine, 2)
-            add_label(plot_bp, (r.t_S3e + r.t_prt_end) / 2, r.avg_sbp,
-                      f"PRT={r.PRT:.1f}s" if r.PRT else "PRT", _PIII,
-                      anchor=(0.5, 1.0), dy=2)
+        # B bracket: horizontal lines span nadir→S2lmax; vertical + label at midpoint
+        if r.t_S2lmax and r.v_S2lmax and r.t_S2es and r.v_nadir is not None and r.B is not None:
+            t_b = (r.t_S2es + r.t_S2lmax) / 2
+            add_hline_seg(plot_bp, r.t_S2es, r.t_S2lmax, r.v_S2lmax, _PI)
+            add_hline_seg(plot_bp, r.t_S2es, r.t_S2lmax, r.v_nadir,  _PII)
+            add_vline_seg(plot_bp, t_b, r.v_nadir, r.v_S2lmax, _PIII, _DashLine)
+            add_label(plot_bp, t_b, r.v_S2lmax,
+                      f"B={r.B:.0f}", _PIII, anchor=(0.5, 1.0))
 
-        # Point #10 SBP overshoot
-        add_dot(plot_bp, r.t_ov, r.v_ov, _PIV)
+        # Point #10 SBP overshoot — draggable on BP
+        if r.t_ov is not None and r.v_ov is not None and len(_t_sys):
+            add_draggable_dot(
+                plot_bp, r.t_ov, _t_sys, _v_sys, _PIV, _cb("t_ov"),
+                t_min=r.t_S3e, t_max=r.t_S4e,
+            )
+        else:
+            add_dot(plot_bp, r.t_ov, r.v_ov, _PIV)
         if r.t_ov and r.v_ov:
             add_label(plot_bp, r.t_ov, r.v_ov, "SBP\nOvershoot", _PIV, anchor=(0.5, 1.0), dy=2)
 
-        # Points #11/#12 HR max/min + VR bracket
-        add_dot(plot_hr, r.hr_max_t, r.hr_max_v, _PIII)
+        # Point #11 HR max — draggable on HR panel
+        if r.hr_max_t is not None and r.hr_max_v is not None and len(_t_hr):
+            add_draggable_dot(
+                plot_hr, r.hr_max_t, _t_hr, _v_hr, _PIII, _cb("hr_max_t"),
+                t_min=r.t_S2es, t_max=(r.t_S3s + 5 if r.t_S3s else None),
+            )
+        else:
+            add_dot(plot_hr, r.hr_max_t, r.hr_max_v, _PIII)
         if r.hr_max_t and r.hr_max_v:
             add_label(plot_hr, r.hr_max_t, r.hr_max_v,
                       f"HR max\n{r.hr_max_v:.1f}", _PIII, anchor=(0.5, 1.0), dy=1)
-        add_dot(plot_hr, r.hr_min_t, r.hr_min_v, _PIV)
-        if r.hr_min_t and r.hr_min_v:
+
+        # Point #12 HR min — draggable on HR panel
+        if r.hr_min_t is not None and r.hr_min_v is not None and len(_t_hr):
+            # Confirmed HR min
+            add_draggable_dot(
+                plot_hr, r.hr_min_t, _t_hr, _v_hr, _PIV, _cb("hr_min_t"),
+                t_min=r.hr_max_t, t_max=r.t_S4e,
+            )
             add_label(plot_hr, r.hr_min_t, r.hr_min_v,
                       f"HR min\n{r.hr_min_v:.1f}", _PIV, anchor=(0.5, 0.0), dy=-1)
 
-        if r.hr_max_t and r.hr_min_t and r.t_S4e:
-            add_hline_seg(plot_hr, r.hr_max_t, r.t_S4e, r.hr_max_v, _PIII)
-            add_hline_seg(plot_hr, r.hr_min_t, r.t_S4e, r.hr_min_v, _PIV)
-            add_vline_seg(plot_hr, r.t_S4e, r.hr_min_v, r.hr_max_v, _PIV)
+        elif r.hr_max_t is not None and len(_t_hr) and on_point_override is not None:
+            # PIV suppressed (calibration) but HR signal is intact — show a ghost
+            # point at the algorithm's best guess so the investigator can drag to confirm.
+            _search_end = r.hr_max_t + 30.0
+            _mask = (_t_hr >= r.hr_max_t) & (_t_hr <= _search_end)
+            if np.any(_mask):
+                _i = int(np.argmin(_v_hr[_mask]))
+                _t_ghost = float(_t_hr[_mask][_i])
+                add_draggable_dot(
+                    plot_hr, _t_ghost, _t_hr, _v_hr, _PIV, _cb("hr_min_t"),
+                    t_min=r.hr_max_t, size=12, symbol="t1",
+                )
+                add_label(plot_hr, _t_ghost, float(_v_hr[_mask][_i]),
+                          "HR min\n(drag to confirm)", _PIV,
+                          anchor=(0.5, 0.0), dy=-1)
+
+        # VR bracket — use t_S4e if available, otherwise anchor at hr_min_t
+        _vr_end = r.t_S4e or r.hr_min_t
+        if r.hr_max_t and r.hr_min_t and _vr_end:
+            add_hline_seg(plot_hr, r.hr_max_t, _vr_end, r.hr_max_v, _PIII)
+            add_hline_seg(plot_hr, r.hr_min_t, _vr_end, r.hr_min_v, _PIV)
+            add_vline_seg(plot_hr, _vr_end, r.hr_min_v, r.hr_max_v, _PIV)
             if r.VR:
-                add_label(plot_hr, r.t_S4e + 1, (r.hr_max_v + r.hr_min_v) / 2,
+                add_label(plot_hr, _vr_end + 1, (r.hr_max_v + r.hr_min_v) / 2,
                           f"VR={r.VR:.2f}", _PIV, anchor=(0.0, 0.5))
 
         # HR subplot y-range
@@ -240,14 +545,12 @@ class ValsalvaPlotter:
             return None
         return float(np.interp(t, sig.times, sig.values))
 
-    def _export(
+    def export(
         self,
         plot_widget: pg.GraphicsLayoutWidget,
-        plot1: pg.PlotItem,
-        plot2: pg.PlotItem,
-        plot3: pg.PlotItem,
         result: ValsalvaResult,
         output_dir: Path,
+        mode: str = "auto",
     ) -> None:
         from autonomiclab.export.excel import ExcelExporter
         from autonomiclab.export.image import ImageExporter as ImgExp
@@ -255,22 +558,8 @@ class ValsalvaPlotter:
         img_exp  = ImgExp()
         xls_exp  = ExcelExporter()
 
-        png_full = output_dir / f"{output_dir.name}_valsalva_plot.png"
+        png_full = output_dir / f"{output_dir.parent.name}_valsalva_plot.png"
         img_exp.export_scene(plot_widget, png_full)
 
-        png_zoom = None
-        if result.t_S1s and result.t_S4e:
-            png_zoom = output_dir / f"{output_dir.name}_valsalva_plot_zoom.png"
-            img_exp.export_zoomed_scene(
-                plot_widget,
-                [plot1, plot2, plot3],
-                result.t_S1s - 5,
-                result.t_S4e + 5,
-                png_zoom,
-            )
-            # Restore zoom after export
-            if result.t_S1s and result.t_S4e:
-                plot1.setXRange(result.t_S1s - 60, result.t_S4e + 15)
-
-        xlsx_path = xls_exp.export_valsalva(result, output_dir)
-        xls_exp.embed_images_valsalva(xlsx_path, png_full, png_zoom)
+        xlsx_path = xls_exp.export_valsalva(result, output_dir, mode)
+        xls_exp.embed_images_valsalva(xlsx_path, png_full, None)

@@ -52,16 +52,8 @@ class AppSettings:
 
     @property
     def data_folder(self) -> Path:
-        """Last used data folder; defaults to the Finapres Files path."""
-        raw = self._data.get("data_folder")
-        if raw:
-            return Path(raw)
+        """Default data folder."""
         return _DEFAULT_DATA_FOLDER
-
-    @data_folder.setter
-    def data_folder(self, path: Path) -> None:
-        self._data["data_folder"] = str(path)
-        self.save()
 
     @property
     def ui_zoom(self) -> int:

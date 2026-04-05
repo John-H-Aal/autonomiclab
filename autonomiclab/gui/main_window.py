@@ -10,14 +10,16 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette  # QPalette/QColor used in _ComboDelegate
 from PyQt6.QtWidgets import (
     QApplication, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel,
-    QMainWindow, QPushButton, QSplitter, QStackedWidget,
+    QMainWindow, QMessageBox, QPushButton, QSplitter, QStackedWidget,
     QStyledItemDelegate, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
+from autonomiclab.gui.close_mixin import EscapeCloseMixin
 from autonomiclab.config.app_settings import AppSettings
 from autonomiclab.config.font_loader import FontLoader
 from autonomiclab.core.dataset_service import DatasetService
 from autonomiclab.core.models import Dataset
+from autonomiclab.core import overrides as override_store
 from autonomiclab.gui.raw_data_window import RawDataWindow
 from autonomiclab.gui.widgets.interactive_plot import InteractivePlotWidget
 from autonomiclab.plotting.overview import OverviewPlotter
@@ -71,7 +73,7 @@ _SECONDARY_BTN = """
 """
 
 
-class MainWindow(QMainWindow):
+class MainWindow(EscapeCloseMixin, QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("AutonomicLab — GAT Protocol Analysis")
@@ -82,6 +84,10 @@ class MainWindow(QMainWindow):
         self._svc          = DatasetService()
         self._overview     = OverviewPlotter()
         self._dataset: Dataset | None = None
+        self._last_protocol_key: str | None = None
+        self._last_result: object | None = None
+        self._overrides: dict[str, dict] = {}   # phase → {t_bl_s, t_bl_e}
+        self._analysis_mode: str = "auto"
 
         self._init_ui()
         self._init_empty_plots()
@@ -111,7 +117,7 @@ class MainWindow(QMainWindow):
 
         # ── left panel ────────────────────────────────────────────────────────
         left_widget = QWidget()
-        left_widget.setStyleSheet("background-color: #fafafa;")
+        left_widget.setStyleSheet("background-color: #e8edf3;")
         left_layout = QVBoxLayout()
         left_layout.setContentsMargins(14, 14, 14, 14)
         left_layout.setSpacing(6)
@@ -164,6 +170,42 @@ class MainWindow(QMainWindow):
         )
         left_layout.addWidget(self.filter_combo)
 
+        self.export_button = QPushButton("Export Excel")
+        self.export_button.setMinimumHeight(36)
+        self.export_button.setEnabled(False)
+        self.export_button.clicked.connect(lambda: self._export_current())
+        self.export_button.setStyleSheet(
+            _SECONDARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
+        )
+        left_layout.addWidget(self.export_button)
+
+        self.reset_button = QPushButton("Reset to Auto")
+        self.reset_button.setMinimumHeight(36)
+        self.reset_button.setEnabled(False)
+        self.reset_button.setVisible(False)
+        self.reset_button.clicked.connect(lambda: self._reset_to_auto())
+        self.reset_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #b34700;
+                border: 1px solid #b34700;
+                border-radius: 4px;
+                padding: 7px 16px;
+                font-size: """ + str(btn_font["size"]) + """px;
+            }
+            QPushButton:hover { background-color: #fff3e0; }
+            QPushButton:pressed { background-color: #ffe0b2; }
+        """)
+        left_layout.addWidget(self.reset_button)
+
+        self.override_label = QLabel()
+        self.override_label.setWordWrap(True)
+        self.override_label.setVisible(False)
+        self.override_label.setStyleSheet(
+            "color: #b34700; font-size: 10px; padding: 2px 0;"
+        )
+        left_layout.addWidget(self.override_label)
+
         left_layout.addSpacing(6)
         left_layout.addWidget(self._make_section_header("Markers"))
 
@@ -209,7 +251,7 @@ class MainWindow(QMainWindow):
         self._plot_stack = QStackedWidget()
 
         placeholder = QWidget()
-        placeholder.setStyleSheet("background-color: white;")
+        placeholder.setStyleSheet("background-color: #c8d8e8;")
         ph_layout = QVBoxLayout()
         ph_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         ph_font = FontLoader.get("plot_panel", "placeholder")
@@ -221,7 +263,7 @@ class MainWindow(QMainWindow):
         self._plot_stack.addWidget(placeholder)       # index 0
 
         self.plot_widget = InteractivePlotWidget()
-        self.plot_widget.setBackground("w")
+        self.plot_widget.setBackground("#c8d8e8")
         self._plot_stack.addWidget(self.plot_widget)  # index 1
         self._plot_stack.setCurrentIndex(0)
 
@@ -279,7 +321,6 @@ class MainWindow(QMainWindow):
             QFileDialog.Option.ShowDirsOnly,
         )
         if folder:
-            self._settings.data_folder = Path(folder)
             self._load_dataset(Path(folder))
 
     def _load_dataset(self, folder: Path) -> None:
@@ -293,6 +334,11 @@ class MainWindow(QMainWindow):
         if not self._dataset.markers:
             self._set_status("warning", "No markers found")
             return
+
+        # Restore any previously saved manual overrides for this dataset
+        self._overrides = override_store.load(self._dataset.path)
+        if self._overrides:
+            log.info("Loaded %d override(s) from disk", len(self._overrides))
 
         self._set_status("ok", f"Loaded: {self._dataset.path.name}")
         self._populate_phase_combo()
@@ -334,6 +380,12 @@ class MainWindow(QMainWindow):
 
         phase = self.filter_combo.currentText()
 
+        self._last_protocol_key = None
+        self._last_result = None
+        self.export_button.setEnabled(False)
+        self.reset_button.setVisible(False)
+        self.override_label.setVisible(False)
+
         try:
             if phase == "All":
                 self._overview.plot(self.plot_widget, self._dataset)
@@ -345,14 +397,59 @@ class MainWindow(QMainWindow):
                     self._overview.plot(self.plot_widget, self._dataset)
                 else:
                     handlers = PROTOCOL_REGISTRY[protocol_key]
-                    result = handlers["analyzer"].analyze(
-                        self._dataset, self._dataset.markers
+
+                    # Pass time window so multiple sections find their own markers
+                    analyze_kwargs = (
+                        {"t_start": t_start, "t_end": t_end}
+                        if protocol_key == "valsalva" else {}
                     )
+                    result = handlers["analyzer"].analyze(
+                        self._dataset, self._dataset.markers, **analyze_kwargs
+                    )
+
+                    # Restore previous manual overrides for this phase
+                    if phase in self._overrides:
+                        ov = self._overrides[phase]
+                        if protocol_key == "valsalva":
+                            if "t_bl_s" in ov and "t_bl_e" in ov:
+                                result.t_bl_s = ov["t_bl_s"]
+                                result.t_bl_e = ov["t_bl_e"]
+                                handlers["analyzer"].recompute_from_baseline(result, self._dataset)
+                            if ov.get("points"):
+                                handlers["analyzer"].apply_point_overrides(
+                                    result, self._dataset, ov["points"]
+                                )
+                        elif protocol_key == "deep breath":
+                            if "cycles" in ov:  # empty list is a valid override (all deleted)
+                                handlers["analyzer"].apply_cycle_overrides(
+                                    result, self._dataset, ov["cycles"]
+                                )
+                        self._analysis_mode = "manual"
+                    else:
+                        self._analysis_mode = "auto"
+
+                    plot_kwargs = {}
+                    if protocol_key == "valsalva":
+                        plot_kwargs["on_manual_override"] = (
+                            lambda t0, t1, p=phase: self._on_baseline_override(p, t0, t1)
+                        )
+                        plot_kwargs["on_point_override"] = (
+                            lambda field, t, p=phase: self._on_point_override(p, field, t)
+                        )
+                    elif protocol_key == "deep breath":
+                        plot_kwargs["on_cycle_override"] = (
+                            lambda cycles, p=phase: self._on_db_cycle_override(p, cycles)
+                        )
+
                     handlers["plotter"].plot(
                         self.plot_widget, self._dataset, result,
-                        t_start, t_end,
-                        output_dir=self._dataset.path,
+                        t_start, t_end, **plot_kwargs,
                     )
+                    self._last_protocol_key = protocol_key
+                    self._last_result = result
+                    self.export_button.setEnabled(True)
+                    if protocol_key in ("valsalva", "deep breath"):
+                        self._update_override_indicator(phase)
 
             self._register_plots()
 
@@ -360,6 +457,127 @@ class MainWindow(QMainWindow):
             log.exception("Plot error: %s", exc)
             self._set_status("error", f"Plot error: {exc}")
             self.statusBar().showMessage(f"Plot error: {exc}")
+
+    _PROTOCOL_SLUG = {
+        "valsalva":    "valsalva_results",
+        "deep breath": "deep_breathing_results",
+        "stand":       "stand_results",
+    }
+
+    def _on_baseline_override(self, phase: str, t_bl_s: float, t_bl_e: float) -> None:
+        ov = self._overrides.setdefault(phase, {})
+        ov["t_bl_s"] = t_bl_s
+        ov["t_bl_e"] = t_bl_e
+        self._analysis_mode = "manual"
+        if self._dataset:
+            override_store.save(self._dataset.path, self._overrides)
+        self._update_override_indicator(phase)
+
+    def _on_db_cycle_override(self, phase: str, cycles: list[dict]) -> None:
+        """Called when investigator moves, deletes or inserts a deep-breathing cycle."""
+        ov = self._overrides.setdefault(phase, {})
+        ov["cycles"] = cycles
+        self._analysis_mode = "manual"
+        if self._dataset:
+            override_store.save(self._dataset.path, self._overrides)
+        self._update_override_indicator(phase)
+        self._plot_current_phase()
+
+    def _on_point_override(self, phase: str, field: str, new_t: float) -> None:
+        """Called when the investigator drags a marker point to a new position."""
+        ov = self._overrides.setdefault(phase, {})
+        ov.setdefault("points", {})[field] = new_t
+        self._analysis_mode = "manual"
+        if self._dataset:
+            override_store.save(self._dataset.path, self._overrides)
+        self._update_override_indicator(phase)
+        # Re-plot so all dependent annotations (A, B, brackets, shades) update
+        self._plot_current_phase()
+
+    def _update_override_indicator(self, phase: str) -> None:
+        has_override = phase in self._overrides
+        self.reset_button.setVisible(has_override)
+        self.reset_button.setEnabled(has_override)
+        if has_override:
+            ov = self._overrides[phase]
+            has_baseline = "t_bl_s" in ov or "t_bl_e" in ov
+            has_points   = bool(ov.get("points"))
+            has_cycles   = "cycles" in ov
+            if has_cycles:
+                n = len(ov["cycles"])
+                what = "All RSA cycles deleted" if n == 0 else "RSA cycles manually edited"
+            elif has_baseline and has_points:
+                what = "Baseline + markers overridden"
+            elif has_baseline:
+                what = "Baseline overridden"
+            else:
+                n = len(ov.get("points", {}))
+                what = f"{n} marker{'s' if n != 1 else ''} overridden"
+            saved_at = ov.get("saved_at", "")
+            date_str = f"\nSaved: {saved_at}" if saved_at else ""
+            self.override_label.setText(f"Manual override active: {what}{date_str}")
+            self.override_label.setVisible(True)
+        else:
+            self.override_label.setVisible(False)
+
+    def _reset_to_auto(self) -> None:
+        from PyQt6.QtWidgets import QMessageBox
+        phase = self.filter_combo.currentText()
+        answer = QMessageBox.question(
+            self,
+            "Reset to Auto",
+            f"Discard all manual overrides for '{phase}' and restore the algorithm result?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        if phase in self._overrides:
+            del self._overrides[phase]
+            if self._dataset:
+                override_store.save(self._dataset.path, self._overrides)
+        self._analysis_mode = "auto"
+        self._update_override_indicator(phase)
+        self._plot_current_phase()
+
+    def _export_current(self, mode: str = "auto") -> None:
+        mode = self._analysis_mode
+        if not self._last_protocol_key or self._last_result is None or not self._dataset:
+            return
+        handlers = PROTOCOL_REGISTRY[self._last_protocol_key]
+        results_dir = self._dataset.path / "results"
+        results_dir.mkdir(exist_ok=True)
+
+        slug = self._PROTOCOL_SLUG.get(self._last_protocol_key, self._last_protocol_key)
+        existing = sorted(results_dir.glob(f"*_{slug}_*_{mode}.xlsx"))
+        if existing:
+            names = "\n".join(f.name for f in existing)
+            answer = QMessageBox.question(
+                self,
+                "Export already exists",
+                f"A {mode} export for this protocol already exists:\n\n{names}\n\nExport again?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
+
+        try:
+            self.export_button.setEnabled(False)
+            self.export_button.setText("Exporting…")
+            QApplication.processEvents()
+            handlers["plotter"].export(
+                self.plot_widget, self._last_result, results_dir, mode
+            )
+            self._set_status("ok", "Excel exported")
+            self.statusBar().showMessage("Excel exported successfully")
+        except Exception as exc:
+            log.exception("Export error: %s", exc)
+            self._set_status("error", f"Export error: {exc}")
+            self.statusBar().showMessage(f"Export error: {exc}")
+        finally:
+            self.export_button.setText("Export Excel")
+            self.export_button.setEnabled(True)
 
     def _register_plots(self) -> None:
         for item in self.plot_widget.scene().items():
@@ -414,9 +632,11 @@ class MainWindow(QMainWindow):
                 continue
             row = self.markers_table.rowCount()
             self.markers_table.insertRow(row)
-            self.markers_table.setItem(row, 0, QTableWidgetItem(f"{m.time:.1f}"))
-            self.markers_table.setItem(row, 1, QTableWidgetItem(m.phase[:8]))
-            self.markers_table.setItem(row, 2, QTableWidgetItem(m.label[:30]))
+            tip = f"{m.phase}  |  {m.label}  |  T = {m.time:.1f} s"
+            for col, text in enumerate((f"{m.time:.1f}", m.phase[:8], m.label[:30])):
+                item = QTableWidgetItem(text)
+                item.setToolTip(tip)
+                self.markers_table.setItem(row, col, item)
 
     # ── raw data window ───────────────────────────────────────────────────────
 

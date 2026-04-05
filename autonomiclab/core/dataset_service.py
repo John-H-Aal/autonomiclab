@@ -31,6 +31,7 @@ _SIGNAL_NAMES: list[tuple[str, str]] = [
     ("ECG aVL",        "mV"),
     ("ECG aVF",        "mV"),
     ("ECG C1",         "mV"),
+    ("PhysioCalActive", ""),   # 0/1 flag: 1 = Finapres mid-recording calibration active
 ]
 
 

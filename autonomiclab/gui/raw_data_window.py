@@ -4,17 +4,20 @@ from __future__ import annotations
 
 import numpy as np
 import pyqtgraph as pg
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QCheckBox, QDialog, QHBoxLayout, QLabel, QVBoxLayout, QWidget,
 )
 
+from autonomiclab.gui.close_mixin import EscapeCloseMixin
 from autonomiclab.core.models import Dataset
 from autonomiclab.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class RawDataWindow(QDialog):
+class RawDataWindow(EscapeCloseMixin, QDialog):
     """Raw data viewer: BP, HR, PAirway, ECG leads with checkbox panel."""
 
     _GROUPS = [
@@ -49,6 +52,12 @@ class RawDataWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Raw Data Viewer")
         self.showMaximized()
+
+        # QShortcut with WindowShortcut context fires even when a child widget
+        # (e.g. pyqtgraph ViewBox) has keyboard focus, unlike keyPressEvent.
+        esc = QShortcut(QKeySequence(Qt.Key.Key_Escape), self)
+        esc.setContext(Qt.ShortcutContext.WindowShortcut)
+        esc.activated.connect(self.close)
 
         self._dataset = dataset
         rr = dataset.get_signal("HR ECG (RR-int)")
@@ -114,7 +123,7 @@ class RawDataWindow(QDialog):
 
         # ── plot area ─────────────────────────────────────────────────────────
         self._gw = pg.GraphicsLayoutWidget()
-        self._gw.setBackground("w")
+        self._gw.setBackground("#c8d8e8")
         outer.addWidget(self._gw, stretch=1)
 
         self._rebuild()
@@ -167,6 +176,15 @@ class RawDataWindow(QDialog):
 
     # ── plot rebuild ──────────────────────────────────────────────────────────
 
+    _Y_AXIS_WIDTH = 62  # px — fixed so all plot areas align vertically
+
+    @staticmethod
+    def _style(plot: pg.PlotItem) -> None:
+        plot.getViewBox().setBackgroundColor("#ffffff")
+        for axis in ("left", "bottom", "top", "right"):
+            plot.getAxis(axis).setPen(pg.mkPen(color="k", width=1))
+        plot.getAxis("left").setWidth(RawDataWindow._Y_AXIS_WIDTH)
+
     def _rebuild(self) -> None:
         # Save current X range
         x_range = None
@@ -190,6 +208,7 @@ class RawDataWindow(QDialog):
 
             row = len(plots)
             plot = self._gw.addPlot(row=row, col=0, title=grp_key)
+            self._style(plot)
             plot.showGrid(x=True, y=True, alpha=0.3)
             plot.setLabel("left", grp_label)
             plot.addLegend(offset=(10, 10))
@@ -232,6 +251,7 @@ class RawDataWindow(QDialog):
 
             row = len(plots)
             plot = self._gw.addPlot(row=row, col=0, title=sig_name)
+            self._style(plot)
             plot.showGrid(x=True, y=True, alpha=0.3)
             plot.setLabel("left", "mV")
             plot.plot(sig.times, sig.values, pen=pg.mkPen(color=color, width=1))
@@ -267,6 +287,7 @@ class RawDataWindow(QDialog):
                                    for i in range(len(t_ap))])
                 row = len(plots)
                 plot = self._gw.addPlot(row=row, col=0, title="PTT")
+                self._style(plot)
                 plot.showGrid(x=True, y=True, alpha=0.3)
                 plot.setLabel("left", "PTT (ms)")
                 plot.plot(t_ap, ptt_ms, pen=pg.mkPen(color="#555555", width=1.5))

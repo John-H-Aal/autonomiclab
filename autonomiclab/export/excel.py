@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -24,9 +25,12 @@ class ExcelExporter:
 
     # ── Valsalva ─────────────────────────────────────────────────────────────
 
-    def export_valsalva(self, result: ValsalvaResult, output_dir: Path) -> Path:
-        """Write Valsalva results to ``<prefix>_valsalva_results.xlsx``."""
-        out_path = output_dir / f"{output_dir.name}_valsalva_results.xlsx"
+    def export_valsalva(
+        self, result: ValsalvaResult, output_dir: Path, mode: str = "auto"
+    ) -> Path:
+        """Write Valsalva results to a timestamped, mode-tagged xlsx file."""
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = output_dir / f"{output_dir.parent.name}_valsalva_results_{stamp}_{mode}.xlsx"
 
         hdr_fill  = PatternFill("solid", start_color="1F4E79")
         sect_fill = PatternFill("solid", start_color="D6E4F0")
@@ -170,9 +174,12 @@ class ExcelExporter:
 
     # ── Deep Breathing ───────────────────────────────────────────────────────
 
-    def export_deep_breathing(self, result: DeepBreathingResult, output_dir: Path) -> Path:
-        """Write Deep Breathing RSA results to ``<prefix>_deep_breathing_results.xlsx``."""
-        out_path = output_dir / f"{output_dir.name}_deep_breathing_results.xlsx"
+    def export_deep_breathing(
+        self, result: DeepBreathingResult, output_dir: Path, mode: str = "auto"
+    ) -> Path:
+        """Write Deep Breathing RSA results to a timestamped, mode-tagged xlsx file."""
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = output_dir / f"{output_dir.parent.name}_deep_breathing_results_{stamp}_{mode}.xlsx"
 
         hdr_font  = Font(name="Arial", bold=True, color="FFFFFF", size=11)
         hdr_fill  = PatternFill("solid", fgColor="1F4E79")

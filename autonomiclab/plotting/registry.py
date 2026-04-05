@@ -8,8 +8,9 @@ Usage::
     if key:
         handlers = PROTOCOL_REGISTRY[key]
         result = handlers["analyzer"].analyze(dataset, dataset.markers)
-        handlers["plotter"].plot(plot_widget, dataset, result, t_start, t_end,
-                                  output_dir=dataset.path)
+        handlers["plotter"].plot(plot_widget, dataset, result, t_start, t_end)
+        # Export is triggered manually via the Export Excel button, not here:
+        # handlers["plotter"].export(plot_widget, result, dataset.path)
 """
 
 from __future__ import annotations
