@@ -1,0 +1,1436 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="950"
+   height="720"
+   viewBox="0 0 950 720"
+   font-family="Arial, sans-serif"
+   version="1.1"
+   id="svg75"
+   sodipodi:docname="valsalva_method.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview75"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.3111112"
+     inkscape:cx="426.20191"
+     inkscape:cy="403.26922"
+     inkscape:window-width="1920"
+     inkscape:window-height="1131"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg75" />
+  <!-- Background -->
+  <rect
+     width="950"
+     height="720"
+     fill="#fafafa"
+     id="rect1"
+     x="0"
+     y="0"
+     style="stroke-width:1.02899" />
+  <!-- Title -->
+  <text
+     x="475"
+     y="26"
+     text-anchor="middle"
+     font-size="15px"
+     font-weight="bold"
+     fill="#222222"
+     id="text1">Valsalva Maneuver – Hemodynamic Phases</text>
+  <text
+     x="475"
+     y="43"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#666666"
+     id="text2">Novak (2011) / Mayo Clinic notation · J Vis Exp 2011;53:e2502</text>
+  <!-- ══════════════════════════════════════════════
+       SHARED LAYOUT CONSTANTS
+       Left margin: 80, right: 930, width: 850
+       Phase boundaries (x):
+         Baseline: 80–175
+         PI:       175–235
+         PII start:235  IIe nadir:~370  IIl end:~535
+         PIII:     535–595
+         PIV:      595–930
+       ══════════════════════════════════════════════ -->
+  <!-- ─── PHASE BACKGROUND BANDS (shared, drawn three times) ─── -->
+  <!-- Helper macro-style: just repeat rects for each subplot -->
+  <!-- ════════════════════════════════
+       SUBPLOT 1: Valsalva Pressure
+       y: 60–170  (plot area 75–160)
+       ════════════════════════════════ -->
+  <!-- Bands -->
+  <rect
+     x="80"
+     y="58"
+     width="47"
+     height="115"
+     fill="#e8f4e8"
+     opacity="0.7"
+     id="rect2" />
+  <rect
+     x="127"
+     y="58"
+     width="48"
+     height="115"
+     fill="#ede7f6"
+     opacity="0.7"
+     id="rect2b"
+     style="fill:#ffffff;fill-opacity:1" />
+  <rect
+     x="175"
+     y="58"
+     width="60"
+     height="115"
+     fill="#fff3e0"
+     opacity="0.65"
+     id="rect3" />
+  <rect
+     x="235"
+     y="58"
+     width="135"
+     height="115"
+     fill="#ffcdd7"
+     opacity="0.549"
+     id="rect4a" />
+  <rect
+     x="370"
+     y="58"
+     width="165"
+     height="115"
+     fill="#ffa0b4"
+     opacity="0.588"
+     id="rect4b" />
+  <rect
+     x="535"
+     y="58"
+     width="30"
+     height="115"
+     fill="#e8eaf6"
+     opacity="0.65"
+     id="rect5"
+     style="stroke-width:0.707107;fill:#c3aaeb;fill-opacity:1" />
+  <rect
+     x="565"
+     y="58"
+     width="365"
+     height="115"
+     fill="#e0f7fa"
+     opacity="0.5"
+     id="rect6"
+     style="stroke-width:1.04382;fill:#9bdcf0;fill-opacity:1" />
+  <!-- Phase label row -->
+  <text
+     x="103"
+     y="72"
+     text-anchor="middle"
+     font-size="11px"
+     font-weight="bold"
+     fill="#2e7d32"
+     id="text6">Baseline</text>
+  <text
+     x="205"
+     y="72"
+     text-anchor="middle"
+     font-size="11px"
+     font-weight="bold"
+     fill="#e65100"
+     id="text7">PI</text>
+  <text
+     x="385"
+     y="72"
+     text-anchor="middle"
+     font-size="13px"
+     font-weight="bold"
+     fill="#c62828"
+     id="text8">PII</text>
+  <text
+     x="551"
+     y="72"
+     text-anchor="middle"
+     font-size="11px"
+     font-weight="bold"
+     fill="#283593"
+     id="text9">PIII</text>
+  <text
+     x="762"
+     y="72"
+     text-anchor="middle"
+     font-size="11px"
+     font-weight="bold"
+     fill="#006064"
+     id="text10">PIV</text>
+  <!-- IIe / IIl sublabels with S2 early / S2 late -->
+  <text
+     x="290"
+     y="84"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#c62828"
+     id="text11">IIe</text>
+  <text
+     x="460"
+     y="84"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#c62828"
+     id="text12">IIl</text>
+  <!-- LabVIEW aliases -->
+  <text
+     x="103"
+     y="84"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text13">(Baseline)</text>
+  <text
+     x="205"
+     y="84"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text14">(S1)</text>
+  <text
+     x="290"
+     y="96"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text15">(S2 early)</text>
+  <text
+     x="460"
+     y="96"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text16">(S2 late)</text>
+  <text
+     x="551"
+     y="84"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text17">(S3)</text>
+  <text
+     x="762"
+     y="84"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#777777"
+     font-style="italic"
+     id="text18">(S4)</text>
+  <!-- Axes subplot 1 -->
+  <line
+     x1="80"
+     y1="100"
+     x2="80"
+     y2="168"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line18" />
+  <line
+     x1="80"
+     y1="168"
+     x2="930"
+     y2="168"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line19" />
+  <text
+     x="-138"
+     y="20"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#555555"
+     transform="rotate(-90)"
+     id="text19">VP (mmHg)</text>
+  <!-- Y ticks -->
+  <text
+     x="75"
+     y="169"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text20">0</text>
+  <line
+     x1="77"
+     y1="130"
+     x2="930"
+     y2="130"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line20" />
+  <text
+     x="75"
+     y="133"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text21">40</text>
+  <!-- Valsalva pressure curve: flat 0, rises at PI (x=175), drops at PIII (x=535) -->
+  <path
+     d="m 80,168 h 95 v -38 h 360 v 38 h 395"
+     fill="none"
+     stroke="#37474f"
+     stroke-width="2.5"
+     id="path21" />
+  <!-- Strain label -->
+  <rect
+     x="175"
+     y="130.97272"
+     width="360"
+     height="35.651844"
+     fill="#b0bec5"
+     opacity="0.3"
+     rx="2"
+     id="rect21"
+     style="stroke-width:1.1284" />
+  <text
+     x="355"
+     y="153"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#37474f"
+     id="text22">Strain 40 mmHg · 15 s</text>
+  <!-- Phase dividers (shared vertical lines, drawn over all three subplots) -->
+  <!-- Will be drawn after all subplots -->
+  <!-- ════════════════════════════════
+       SUBPLOT 2: SBP
+       y: 185–340  (plot area)
+       Scale: 80–165 mmHg → y=335–185
+       80mmHg→335, 120→278, 140→249, 160→221, 90→320, 105→299, 150→235
+       linear: y = 335 - (sbp-80)*1.88
+       ════════════════════════════════ -->
+  <!-- Bands -->
+  <rect
+     x="80"
+     y="183"
+     width="47"
+     height="160"
+     fill="#e8f4e8"
+     opacity="0.7"
+     id="rect22" />
+  <rect
+     x="127"
+     y="183"
+     width="48"
+     height="160"
+     fill="#ede7f6"
+     opacity="0.7"
+     id="rect22b"
+     style="fill:#ffffff;fill-opacity:1" />
+  <rect
+     x="175"
+     y="183"
+     width="60"
+     height="160"
+     fill="#fff3e0"
+     opacity="0.65"
+     id="rect23" />
+  <rect
+     x="235"
+     y="183"
+     width="135"
+     height="160"
+     fill="#ffcdd7"
+     opacity="0.549"
+     id="rect24a" />
+  <rect
+     x="370"
+     y="183"
+     width="165"
+     height="160"
+     fill="#ffa0b4"
+     opacity="0.588"
+     id="rect24b" />
+  <rect
+     x="535"
+     y="183"
+     width="30"
+     height="160"
+     fill="#e8eaf6"
+     opacity="0.65"
+     id="rect25"
+     style="stroke-width:0.707107;fill:#c3aaeb;fill-opacity:1" />
+  <rect
+     x="565"
+     y="183"
+     width="365"
+     height="160"
+     fill="#e0f7fa"
+     opacity="0.5"
+     id="rect26"
+     style="stroke-width:1.04382;fill:#9bdcf0;fill-opacity:1" />
+  <!-- Axes -->
+  <line
+     x1="80"
+     y1="183"
+     x2="80"
+     y2="343"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line26" />
+  <line
+     x1="80"
+     y1="343"
+     x2="930"
+     y2="343"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line27" />
+  <text
+     x="-263"
+     y="20"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#555555"
+     transform="rotate(-90)"
+     id="text27">SBP (mmHg)</text>
+  <!-- Grid + ticks: 80,100,120,140,160 -->
+  <!-- y=335-( v-80)*1.88 -->
+  <!-- 80→335 100→297.4 120→259.4 140→221.4 160→183.4 -->
+  <line
+     x1="77"
+     y1="335"
+     x2="80"
+     y2="335"
+     stroke="#333333"
+     stroke-width="1"
+     id="line28" />
+  <text
+     x="75"
+     y="338"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text28">80</text>
+  <line
+     x1="77"
+     y1="297"
+     x2="930"
+     y2="297"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line29" />
+  <text
+     x="75"
+     y="300"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text29">100</text>
+  <line
+     x1="77"
+     y1="259"
+     x2="930"
+     y2="259"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line30" />
+  <text
+     x="75"
+     y="262"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text30">120</text>
+  <line
+     x1="77"
+     y1="221"
+     x2="930"
+     y2="221"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line31" />
+  <text
+     x="75"
+     y="224"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text31">140</text>
+  <line
+     x1="77"
+     y1="183"
+     x2="930"
+     y2="183"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line32" />
+  <text
+     x="75"
+     y="186"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text32">160</text>
+  <!-- Baseline reference dashed line at 120 mmHg → y=259 -->
+  <line
+     x1="80"
+     y1="259"
+     x2="930"
+     y2="259"
+     stroke="#2e7d32"
+     stroke-width="1.2"
+     stroke-dasharray="6, 4"
+     opacity="0.6"
+     id="line33" />
+  <!-- SBP curve:
+       Baseline: 120 → y=259, x=80→175
+       PI rise to 145 → y=212, x=235
+       IIe fall: nadir 88mmHg → y=320, x=370
+       IIl recovery PEAK: 112mmHg → y=335-32*1.88=274, x=500  ← clear peak
+       PIII dip MIN: 90mmHg → y=335-10*1.88=316, x=565        ← clear trough
+       PIV overshoot: 148mmHg → y=335-68*1.88=207, x=680
+       Return to 120: x=870
+  -->
+  <path
+     d="m 80,259 h 95 c 20,0 40,-47 60,-47 15,0 30,28 60,68 25,28 55,40 75,40 25,0 65,-35 100,-44 15,-3 25,-4 30,-4 10,0 25,13 45,33 10,9 15,12 20,11 10,-1 25,-21 55,-68 25,-33 45,-41 60,-43 30,0 65,25 110,45 30,8 65,9 80,9 h 60"
+     fill="none"
+     stroke="#c0392b"
+     stroke-width="2.8"
+     stroke-linejoin="round"
+     id="path33" />
+  <!-- IIe nadir dot at x=370, y=320 -->
+  <circle
+     cx="370"
+     cy="320"
+     r="5"
+     fill="#c62828"
+     id="circle33" />
+  <circle
+     cx="235.07211"
+     cy="212.62019"
+     r="5"
+     fill="#c62828"
+     id="circle33-3" />
+  <text
+     x="378"
+     y="335"
+     font-size="9px"
+     fill="#c62828"
+     id="text33">IIe nadir (BP minimum during strain)</text>
+  <!-- PIV overshoot dot -->
+  <circle
+     cx="680"
+     cy="205"
+     r="5"
+     fill="#006064"
+     id="circle34" />
+  <circle
+     cx="614.78894"
+     cy="258.64868"
+     r="5"
+     fill="#006064"
+     id="circle34-1"
+     style="fill:#283593;fill-opacity:1" />
+  <text
+     x="688"
+     y="202"
+     font-size="9px"
+     fill="#006064"
+     id="text34">SBP Overshoot</text>
+  <text
+     x="613.92389"
+     y="275.92056"
+     font-size="9px"
+     fill="#006064"
+     id="text34-7"
+     style="fill:#283593;fill-opacity:1"><tspan
+       sodipodi:role="line"
+       id="tspan1"
+       x="613.92389"
+       y="275.92056">SBP Back</tspan><tspan
+       sodipodi:role="line"
+       id="tspan2"
+       x="613.92389"
+       y="287.17056">to baseline</tspan></text>
+  <defs
+     id="defs34">
+    <marker
+       style="overflow:visible"
+       id="marker75"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path75" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <!-- no arrow markers - using explicit polygons instead -->
+  </defs>
+  <!-- Bracket ticks for A -->
+  <line
+     x1="148"
+     y1="259"
+     x2="162"
+     y2="259"
+     stroke="#c62828"
+     stroke-width="1.5"
+     id="line34" />
+  <line
+     x1="248"
+     y1="320"
+     x2="262"
+     y2="320"
+     stroke="#c62828"
+     stroke-width="1.5"
+     id="line35" />
+  <!-- Line from baseline to just above arrowhead -->
+  <line
+     x1="255"
+     y1="261"
+     x2="255"
+     y2="312"
+     stroke="#c62828"
+     stroke-width="1.8"
+     id="line36" />
+  <!-- Arrowhead pointing DOWN, tip at y=320 -->
+  <polygon
+     points="155,320 151,312 159,312 "
+     fill="#c62828"
+     id="polygon36"
+     transform="translate(100)" />
+  <text
+     x="261"
+     y="296"
+     font-size="11px"
+     fill="#c62828"
+     font-weight="bold"
+     id="text36">A</text>
+  <!-- Annotation B: IIl max SBP (x=500, y=272) to PIII min SBP (x=565, y=316) -->
+  <line
+     x1="364"
+     y1="272"
+     x2="494"
+     y2="272"
+     stroke="#e65100"
+     stroke-width="1.2"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line37" />
+  <line
+     x1="264.48776"
+     y1="319.96414"
+     x2="368.98569"
+     y2="319.96414"
+     stroke="#e65100"
+     stroke-width="1.50953"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line37-2"
+     style="stroke:#c62828;stroke-width:1.2;stroke-dasharray:3.17980189,2.384859;stroke-dashoffset:0;stroke-opacity:1" />
+  <line
+     x1="445"
+     y1="316"
+     x2="510"
+     y2="316"
+     stroke="#e65100"
+     stroke-width="1.2"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line38" />
+  <circle
+     cx="500"
+     cy="272"
+     r="4"
+     fill="#e65100"
+     id="circle38" />
+  <circle
+     cx="565"
+     cy="316"
+     r="4"
+     fill="#e65100"
+     id="circle39" />
+  <!-- Line from top tick to just above arrowhead -->
+  <line
+     x1="500"
+     y1="274"
+     x2="500"
+     y2="308"
+     stroke="#e65100"
+     stroke-width="1.8"
+     id="line39" />
+  <!-- Arrowhead pointing DOWN, tip at y=316 -->
+  <polygon
+     points="612,308 620,308 616,316 "
+     fill="#e65100"
+     id="polygon39"
+     transform="translate(-116)" />
+  <line
+     x1="489"
+     y1="272"
+     x2="503"
+     y2="272"
+     stroke="#e65100"
+     stroke-width="1.5"
+     id="line40" />
+  <line
+     x1="493"
+     y1="316"
+     x2="507"
+     y2="316"
+     stroke="#e65100"
+     stroke-width="1.5"
+     id="line41" />
+  <line
+     x1="667.69232"
+     y1="259.2644"
+     x2="667.69232"
+     y2="213.14903"
+     stroke="#e65100"
+     stroke-width="2.09631"
+     id="line39-6"
+     style="stroke:#006064;stroke-opacity:1;stroke-width:1.8;stroke-dasharray:none" />
+  <polygon
+     points="612,308 620,308 616,316 "
+     fill="#e65100"
+     id="polygon39-7"
+     transform="matrix(1,0,0,-1,51.692308,521.14904)"
+     style="fill:#006064;fill-opacity:1" />
+  <line
+     x1="660.69232"
+     y1="205.14903"
+     x2="674.69232"
+     y2="205.14903"
+     stroke="#e65100"
+     stroke-width="1.5"
+     id="line41-5"
+     style="stroke:#006064;stroke-opacity:1" />
+  <text
+     x="508"
+     y="299"
+     font-size="11px"
+     fill="#e65100"
+     font-weight="bold"
+     id="text41">B</text>
+  <!-- ════════════════════════════════
+       SUBPLOT 3: Heart Rate
+       y: 358–500
+       Scale: 50–120 bpm → y=490–360
+       linear: y = 490 - (hr-50)*1.86
+       50→490, 70→453, 80→434, 90→415, 100→397, 110→378, 120→359
+       ════════════════════════════════ -->
+  <!-- Bands -->
+  <rect
+     x="80"
+     y="356"
+     width="47"
+     height="150"
+     fill="#e8f4e8"
+     opacity="0.7"
+     id="rect41" />
+  <rect
+     x="127"
+     y="356"
+     width="48"
+     height="150"
+     fill="#ede7f6"
+     opacity="0.7"
+     id="rect41b"
+     style="fill:#ffffff;fill-opacity:1" />
+  <rect
+     x="175"
+     y="356"
+     width="60"
+     height="150"
+     fill="#fff3e0"
+     opacity="0.65"
+     id="rect42" />
+  <rect
+     x="235"
+     y="356"
+     width="135"
+     height="150"
+     fill="#ffcdd7"
+     opacity="0.549"
+     id="rect43a" />
+  <rect
+     x="370"
+     y="356"
+     width="165"
+     height="150"
+     fill="#ffa0b4"
+     opacity="0.588"
+     id="rect43b" />
+  <rect
+     x="535"
+     y="356"
+     width="30"
+     height="150"
+     fill="#e8eaf6"
+     opacity="0.65"
+     id="rect44"
+     style="stroke-width:0.707107;fill:#c3aaeb;fill-opacity:1" />
+  <rect
+     x="565"
+     y="356"
+     width="365"
+     height="150"
+     fill="#e0f7fa"
+     opacity="0.5"
+     id="rect45"
+     style="stroke-width:1.04382;fill:#9bdcf0;fill-opacity:1" />
+  <!-- Axes -->
+  <line
+     x1="80"
+     y1="356"
+     x2="80"
+     y2="506"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line45" />
+  <line
+     x1="80"
+     y1="506"
+     x2="930"
+     y2="506"
+     stroke="#333333"
+     stroke-width="1.5"
+     id="line46" />
+  <text
+     x="-433"
+     y="20"
+     text-anchor="middle"
+     font-size="10px"
+     fill="#555555"
+     transform="rotate(-90)"
+     id="text46">HR (bpm)</text>
+  <!-- Grid 60,80,100 -->
+  <!-- 60→y=490-10*1.86=471.4  80→433.6  100→396  -->
+  <line
+     x1="77"
+     y1="471"
+     x2="930"
+     y2="471"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line47" />
+  <text
+     x="75"
+     y="474"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text47">60</text>
+  <line
+     x1="77"
+     y1="434"
+     x2="930"
+     y2="434"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line48" />
+  <text
+     x="75"
+     y="437"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text48">80</text>
+  <line
+     x1="77"
+     y1="396"
+     x2="930"
+     y2="396"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line49" />
+  <text
+     x="75"
+     y="399"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text49">100</text>
+  <line
+     x1="77"
+     y1="359"
+     x2="930"
+     y2="359"
+     stroke="#dddddd"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     id="line50" />
+  <text
+     x="75"
+     y="362"
+     text-anchor="end"
+     font-size="9px"
+     fill="#666666"
+     id="text50">120</text>
+  <!-- Baseline HR ref at 70bpm → y=453 -->
+  <line
+     x1="80"
+     y1="453"
+     x2="930"
+     y2="453"
+     stroke="#2e7d32"
+     stroke-width="1.2"
+     stroke-dasharray="6, 4"
+     opacity="0.6"
+     id="line51" />
+  <!-- HR curve:
+       y = 490 - (hr-50)*1.86
+       Baseline 70bpm → y=453, x=80→175
+       PI: slight drop to 65bpm → y=462
+       IIe: rises steadily: 85bpm→y=434 at x=370
+       IIl: continues rising to 100bpm→y=397 at x=480
+       IIl→PIII PEAK: 118bpm → y=490-68*1.86=363, x=555  ← sharp peak
+       PIII→PIV: drops sharply to 58bpm → y=490-8*1.86=475, x=690
+       Returns 70bpm: x=850
+  -->
+  <path
+     d="m 80,453 h 95 c 15,0 35,9 60,8 20,-2 43,-19 75,-39 25,-14 45,-20 60,-23 25,-5 60,-9 90,-14 20,-3 40,-7 60,-13 15,-4 27,-7 35,-9 8,-2 17,5 30,15 15,12 40,52 70,84 13,11 23,15 35,16 25,2 58,-12 100,-22 30,-4 65,-4 90,-3 h 50"
+     fill="none"
+     stroke="#1565c0"
+     stroke-width="2.8"
+     stroke-linejoin="round"
+     id="path51" />
+  <!-- HR max dot exactly on peak at x=555, y=363 -->
+  <circle
+     cx="555"
+     cy="363"
+     r="5"
+     fill="#283593"
+     id="circle51" />
+  <text
+     x="530"
+     y="356"
+     font-size="9px"
+     fill="#283593"
+     id="text51">HR max</text>
+  <!-- HR min dot at x=690, y=478 -->
+  <circle
+     cx="690"
+     cy="478"
+     r="5"
+     fill="#006064"
+     id="circle52" />
+  <text
+     x="698"
+     y="491"
+     font-size="9px"
+     fill="#006064"
+     id="text52">HR min</text>
+  <!-- VR bracket from HR max (y=363) to HR min (y=478) -->
+  <line
+     x1="815"
+     y1="368.51419"
+     x2="815"
+     y2="472.28442"
+     stroke="#006064"
+     stroke-width="1.42488"
+     id="line52"
+     style="marker-start:url(#Triangle);marker-end:url(#marker75)" />
+  <line
+     x1="810"
+     y1="363"
+     x2="820"
+     y2="363"
+     stroke="#006064"
+     stroke-width="1.5"
+     id="line53" />
+  <line
+     x1="810"
+     y1="478"
+     x2="820"
+     y2="478"
+     stroke="#006064"
+     stroke-width="1.5"
+     id="line54" />
+  <line
+     x1="562"
+     y1="363.02719"
+     x2="809.42102"
+     y2="363.02719"
+     stroke="#e65100"
+     stroke-width="1.67444"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line37-5"
+     style="stroke:#006064;stroke-width:1.5;stroke-dasharray:3.58328, 2.68746;stroke-dashoffset:0;stroke-opacity:1" />
+  <line
+     x1="554.71381"
+     y1="407.11728"
+     x2="554.71381"
+     y2="365.30179"
+     stroke="#e65100"
+     stroke-width="1.67444"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line37-5-9"
+     style="stroke:#808080;stroke-width:1.5;stroke-dasharray:3.58330124, 2.6874639;stroke-dashoffset:0;stroke-opacity:1;fill:#808080" />
+  <line
+     x1="692.75745"
+     y1="478.00259"
+     x2="808.30231"
+     y2="478.00259"
+     stroke="#e65100"
+     stroke-width="1.67444"
+     stroke-dasharray="4, 3"
+     opacity="0.8"
+     id="line37-5-5"
+     style="stroke:#006064;stroke-width:1.49431;stroke-dasharray:3.56969, 2.67726;stroke-dashoffset:0;stroke-opacity:1" />
+  <text
+     x="819"
+     y="431"
+     font-size="10px"
+     fill="#006064"
+     font-weight="bold"
+     id="text54">VR = HR max/ HR min</text>
+  <!-- ─── PRT annotation in SBP subplot ─── -->
+  <line
+     x1="565"
+     y1="244"
+     x2="565"
+     y2="252"
+     stroke="#283593"
+     stroke-width="1.5"
+     id="line56" />
+  <line
+     x1="615"
+     y1="244"
+     x2="615"
+     y2="252"
+     stroke="#283593"
+     stroke-width="1.5"
+     id="line57" />
+  <!-- Line from left tick to just before arrowhead -->
+  <line
+     x1="565"
+     y1="248"
+     x2="607.05103"
+     y2="248"
+     stroke="#283593"
+     stroke-width="0.861779"
+     id="line58"
+     style="stroke-width:1.15052;stroke-dasharray:none" />
+  <!-- Arrowhead pointing RIGHT, tip at x=855 -->
+  <polygon
+     points="855,248 847,244 847,252 "
+     fill="#283593"
+     id="polygon58"
+     transform="translate(-240)" />
+  <text
+     x="590.8916"
+     y="244.30595"
+     text-anchor="middle"
+     font-size="11px"
+     fill="#283593"
+     font-weight="bold"
+     id="text58">PRT</text>
+  <line
+     x1="554.72601"
+     y1="400.17438"
+     x2="554.72601"
+     y2="408.17438"
+     stroke="#283593"
+     stroke-width="1.5"
+     id="line56-6"
+     style="fill:#808080;stroke:#808080;stroke-opacity:1" />
+  <line
+     x1="875.50916"
+     y1="400.31677"
+     x2="875.50916"
+     y2="408.31677"
+     stroke="#283593"
+     stroke-width="1.5"
+     id="line57-0"
+     style="fill:#808080;stroke:#808080;stroke-opacity:1" />
+  <line
+     x1="562.78058"
+     y1="404.17438"
+     x2="866.72601"
+     y2="404.17438"
+     stroke="#283593"
+     stroke-width="1.77661"
+     id="line58-6"
+     style="fill:#808080;stroke:#808080;stroke-width:1.5;stroke-dasharray:none;stroke-opacity:1" />
+  <polygon
+     points="855,248 847,244 847,252 "
+     fill="#283593"
+     id="polygon58-2"
+     transform="translate(19.726025,156.17439)"
+     style="fill:#808080" />
+  <polygon
+     points="847,252 855,248 847,244 "
+     fill="#283593"
+     id="polygon58-2-8"
+     transform="matrix(-1,0,0,1,1409.9907,155.95554)"
+     style="fill:#808080" />
+  <text
+     x="713.72601"
+     y="400.17438"
+     text-anchor="middle"
+     font-size="11px"
+     fill="#283593"
+     font-weight="bold"
+     id="text58-6"
+     style="font-weight:bold;font-size:11px;text-anchor:middle;fill:#808080"><tspan
+       sodipodi:role="line"
+       id="tspan3"
+       x="713.72601"
+       y="400.17438"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.33333px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal">HR min search interval = HR max + 30 s</tspan><tspan
+       sodipodi:role="line"
+       id="tspan4"
+       x="713.72601"
+       y="414.51071"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:Sans;-inkscape-font-specification:'Sans, @wght=700';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:'wght' 700">(not to scale)</tspan></text>
+  <!-- ─── SHARED PHASE DIVIDERS ─── -->
+  <!-- x=127: Baseline measurement|Anticipatory arousal divider -->
+  <line
+     x1="127"
+     y1="58"
+     x2="127"
+     y2="506"
+     stroke="#7b1fa2"
+     stroke-width="1"
+     stroke-dasharray="3, 3"
+     opacity="0.5"
+     id="line_antici_div" />
+  <!-- Sub-labels in VP subplot -->
+  <text
+     x="103"
+     y="110"
+     text-anchor="middle"
+     font-size="8px"
+     fill="#2e7d32"
+     font-style="italic"
+     id="text_basewin1">Baseline</text>
+  <text
+     x="103"
+     y="119"
+     text-anchor="middle"
+     font-size="8px"
+     fill="#2e7d32"
+     font-style="italic"
+     id="text_basewin2">window</text>
+  <text
+     x="103"
+     y="128"
+     text-anchor="middle"
+     font-size="7px"
+     fill="#2e7d32"
+     font-style="italic"
+     id="text_basewin3">(30 s avg)</text>
+  <text
+     x="151"
+     y="110"
+     text-anchor="middle"
+     font-size="8px"
+     fill="#6a1b9a"
+     font-style="italic"
+     id="text_antici1">Anticipatory</text>
+  <text
+     x="151"
+     y="119"
+     text-anchor="middle"
+     font-size="8px"
+     fill="#6a1b9a"
+     font-style="italic"
+     id="text_antici2">arousal</text>
+  <!-- x=175: Baseline|PI -->
+  <line
+     x1="175"
+     y1="58"
+     x2="175"
+     y2="506"
+     stroke="#aaaaaa"
+     stroke-width="1"
+     stroke-dasharray="4, 3"
+     id="line59" />
+  <!-- x=235: PI|PII -->
+  <line
+     x1="235"
+     y1="58"
+     x2="235"
+     y2="506"
+     stroke="#aaaaaa"
+     stroke-width="1"
+     stroke-dasharray="4, 3"
+     id="line60" />
+  <!-- x=370: IIe|IIl (nadir) -->
+  <line
+     x1="370"
+     y1="58"
+     x2="370"
+     y2="506"
+     stroke="#c62828"
+     stroke-width="1"
+     stroke-dasharray="4, 3"
+     opacity="0.7"
+     id="line61" />
+  <!-- x=535: PII|PIII -->
+  <line
+     x1="535"
+     y1="58"
+     x2="535"
+     y2="506"
+     stroke="#aaaaaa"
+     stroke-width="1"
+     stroke-dasharray="4, 3"
+     id="line62" />
+  <!-- x=595: PIII|PIV -->
+  <line
+     x1="565"
+     y1="58"
+     x2="565"
+     y2="506"
+     stroke="#aaaaaa"
+     stroke-width="1"
+     stroke-dasharray="4, 3"
+     id="line63" />
+  <!-- X axis label (bottom of HR plot) -->
+  <text
+     x="461"
+     y="522"
+     text-anchor="middle"
+     font-size="11px"
+     fill="#444444"
+     id="text63">Time (s)</text>
+  <!-- X ticks -->
+  <text
+     x="80"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text_m45">−45</text>
+  <text
+     x="127"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text_m15">−15</text>
+  <text
+     x="175"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text64">0</text>
+  <text
+     x="235"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text66">~2</text>
+  <text
+     x="535"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text67">15</text>
+  <text
+     x="595"
+     y="520"
+     text-anchor="middle"
+     font-size="9px"
+     fill="#666666"
+     id="text68">~17</text>
+  <!-- "not to scale" bracket spanning BOTH zones: x=80 to x=175 -->
+  <line
+     x1="80"
+     y1="530"
+     x2="175"
+     y2="530"
+     stroke="#555555"
+     stroke-width="1"
+     id="nts_line" />
+  <line
+     x1="80"
+     y1="527"
+     x2="80"
+     y2="533"
+     stroke="#555555"
+     stroke-width="1"
+     id="nts_left" />
+  <line
+     x1="175"
+     y1="527"
+     x2="175"
+     y2="533"
+     stroke="#555555"
+     stroke-width="1"
+     id="nts_right" />
+  <text
+     x="127"
+     y="540"
+     text-anchor="middle"
+     font-size="8px"
+     fill="#555555"
+     font-style="italic"
+     id="text_nts">not to scale</text>
+  <!-- ─── LEGEND / FORMULA BOX ─── -->
+  <rect
+     x="80"
+     y="553"
+     width="850"
+     height="145"
+     fill="#ffffff"
+     stroke="#cccccc"
+     stroke-width="1"
+     rx="5"
+     id="rect68" />
+  <text
+     x="95"
+     y="570"
+     font-size="11px"
+     font-weight="bold"
+     fill="#222222"
+     id="text69">Key measurements (Novak 2011 / Mayo Clinic):</text>
+  <text
+     x="95"
+     y="588"
+     font-size="10px"
+     fill="#c62828"
+     id="text70"><tspan
+   font-weight="bold"
+   id="tspan69">A</tspan> = SBP drop at IIe = Baseline SBP − IIe nadir SBP</text>
+  <text
+     x="95"
+     y="603"
+     font-size="10px"
+     fill="#e65100"
+     id="text71">B = SBP recovery at IIl = max SBP(II late) − min SBP(PII late)</text>
+  <text
+     x="95"
+     y="618"
+     font-size="10px"
+     fill="#283593"
+     id="text72">PRT = Pressure Recovery Time = time from SBP lowest in phase 3 until SBP returns to baseline</text>
+  <text
+     x="95"
+     y="633"
+     font-size="10px"
+     fill="#006064"
+     id="text73"><tspan
+   font-weight="bold"
+   id="tspan72">VR</tspan> = Valsalva Ratio = max HR / min HR [vagal index]</text>
+  <text
+     x="95"
+     y="646"
+     font-size="9px"
+     fill="#006064"
+     font-style="italic"
+     id="text73b">HR min: lowest HR within 30 s of HR max (Novak 2011, Fig. 11; Freeman et al. 2022)</text>
+  <text
+     x="95"
+     y="659"
+     font-size="10px"
+     fill="#555555"
+     id="text74"><tspan
+   font-weight="bold"
+   id="tspan73">BRSa</tspan> = Adrenergic baroreflex sensitivity = (A + B×0.75) / PRT [mmHg/s]</text>
+  <text
+     x="95"
+     y="674"
+     font-size="9px"
+     fill="#888888"
+     id="text75">Refs: Novak P. J Vis Exp 2011;53:e2502 · Freeman R et al. Neurology 2005;65:1506 · Denq JC et al. J Clin Neurophysiol 1998;15:535</text>
+  <text
+     x="95"
+     y="688"
+     font-size="9px"
+     fill="#2e7d32"
+     font-style="italic"
+     id="text_baseline_note">Baseline SBP: mean over 30 s window (−45 to −15 s before strain onset), avoiding anticipatory arousal artefact</text>
+  <line
+     x1="378.16391"
+     y1="434.16776"
+     x2="615.95148"
+     y2="434.16776"
+     stroke="#283593"
+     stroke-width="1.77661"
+     id="line58-6-2"
+     style="fill:#808080;stroke:#808080;stroke-width:1.5;stroke-dasharray:none;stroke-opacity:1" />
+  <polygon
+     points="847,244 847,252 855,248 "
+     fill="#283593"
+     id="polygon58-2-5"
+     transform="translate(-230.793,186.2638)"
+     style="fill:#808080" />
+  <polygon
+     points="847,244 847,252 855,248 "
+     fill="#283593"
+     id="polygon58-2-8-4"
+     transform="matrix(-1,0,0,1,1225.2395,186.06941)"
+     style="fill:#808080" />
+  <text
+     x="457.23706"
+     y="431.22095"
+     text-anchor="middle"
+     font-size="11px"
+     fill="#283593"
+     font-weight="bold"
+     id="text58-6-4"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.33333px;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#808080"><tspan
+       sodipodi:role="line"
+       id="tspan4-0"
+       x="457.23706"
+       y="431.22095"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.33333px;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal">HR max search interval</tspan><tspan
+       sodipodi:role="line"
+       x="457.23706"
+       y="442.8876"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.33333px;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+       id="tspan5">= IIe nadir to (S3 start + 5s)</tspan></text>
+</svg>
