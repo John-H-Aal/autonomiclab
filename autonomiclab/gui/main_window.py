@@ -464,13 +464,22 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         "stand":       "stand_results",
     }
 
+    def _save_overrides(self) -> None:
+        """Persist overrides atomically; show a status-bar warning on failure."""
+        if not self._dataset:
+            return
+        ok = override_store.save(self._dataset.path, self._overrides)
+        if not ok:
+            self.statusBar().showMessage(
+                "WARNING: could not save overrides to disk — check folder permissions", 8000
+            )
+
     def _on_baseline_override(self, phase: str, t_bl_s: float, t_bl_e: float) -> None:
         ov = self._overrides.setdefault(phase, {})
         ov["t_bl_s"] = t_bl_s
         ov["t_bl_e"] = t_bl_e
         self._analysis_mode = "manual"
-        if self._dataset:
-            override_store.save(self._dataset.path, self._overrides)
+        self._save_overrides()
         self._update_override_indicator(phase)
 
     def _on_db_cycle_override(self, phase: str, cycles: list[dict]) -> None:
@@ -478,8 +487,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         ov = self._overrides.setdefault(phase, {})
         ov["cycles"] = cycles
         self._analysis_mode = "manual"
-        if self._dataset:
-            override_store.save(self._dataset.path, self._overrides)
+        self._save_overrides()
         self._update_override_indicator(phase)
         self._plot_current_phase()
 
@@ -488,8 +496,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         ov = self._overrides.setdefault(phase, {})
         ov.setdefault("points", {})[field] = new_t
         self._analysis_mode = "manual"
-        if self._dataset:
-            override_store.save(self._dataset.path, self._overrides)
+        self._save_overrides()
         self._update_override_indicator(phase)
         # Re-plot so all dependent annotations (A, B, brackets, shades) update
         self._plot_current_phase()
@@ -534,8 +541,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
             return
         if phase in self._overrides:
             del self._overrides[phase]
-            if self._dataset:
-                override_store.save(self._dataset.path, self._overrides)
+            self._save_overrides()
         self._analysis_mode = "auto"
         self._update_override_indicator(phase)
         self._plot_current_phase()
