@@ -136,12 +136,13 @@ class ValsalvaAnalyzer:
                 result.hr_max_t = float(t_hr[m][i])
                 result.hr_max_v = float(v_hr[m][i])
 
-        # Phase IV ends 30 s after strain release (t_S3s).
-        # "M Phase 4: End" marks something else in the GAT protocol and must not
-        # override the clinical 30-second PIV window.
+        # Phase IV ends 30 s after HR max (Novak 2011, Fig. 1).
+        # HR max always occurs after strain release, so this window is wider
+        # than t_S3s+30s and correctly covers the HR min trough.
+        # Fall back to t_S3s+30s if HR max was not found.
         result.t_S4e = (
-            (result.t_S3s + 30.0) if result.t_S3s else
-            (result.hr_max_t + 30.0) if result.hr_max_t else None
+            (result.hr_max_t + 30.0) if result.hr_max_t else
+            (result.t_S3s + 30.0)    if result.t_S3s    else None
         )
 
         if result.hr_max_t and result.t_S4e and len(t_hr):
