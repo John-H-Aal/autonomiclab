@@ -135,7 +135,9 @@ class DeepBreathingPlotter:
         v_hr: np.ndarray,
         on_cycle_override: Callable,
     ) -> None:
-        CycleInteractor(plot, result, t_hr, v_hr, on_cycle_override)
+        # Store on self so the instance (and its signal connections) is not
+        # garbage-collected before the user interacts with the plot.
+        self._cycle_interactor = CycleInteractor(plot, result, t_hr, v_hr, on_cycle_override)
 
     # ── table builder ─────────────────────────────────────────────────────────
 

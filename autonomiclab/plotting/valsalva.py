@@ -141,7 +141,9 @@ class ValsalvaPlotter:
         r: ValsalvaResult,
         on_manual_override: Optional[object] = None,
     ) -> None:
-        BaselineRegionInteractor(
+        # Store on self so the instance (and its signal connections) is not
+        # garbage-collected before the user interacts with the plot.
+        self._baseline_interactor = BaselineRegionInteractor(
             plot_bp, plot_hr, plot_pa, dataset, r,
             on_changed=on_manual_override,
         )
