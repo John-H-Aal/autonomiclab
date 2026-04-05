@@ -14,6 +14,7 @@ from autonomiclab.plotting.helpers import (
     add_dot, add_draggable_dot, add_hline_seg, add_label, add_marker_vlines,
     add_vline, add_vline_seg, shade_region, style_plot, add_hr_ecg_markers,
 )
+from autonomiclab.plotting.valsalva_baseline import BaselineRegionInteractor
 from autonomiclab.utils.logger import get_logger
 
 log = get_logger(__name__)
@@ -140,169 +141,10 @@ class ValsalvaPlotter:
         r: ValsalvaResult,
         on_manual_override: Optional[object] = None,
     ) -> None:
-        """Interactive baseline region on BP with live-linked shades and derived values."""
-        if r.t_bl_s is None or r.t_bl_e is None:
-            return
-
-        sys_sig = dataset.get_signal("reSYS")
-        if not sys_sig:
-            # Fall back to static drawing
-            for p in (plot_bp, plot_hr, plot_pa):
-                shade_region(p, r.t_bl_s, r.t_bl_e, _FILL["baseline"])
-            add_vline(plot_bp, r.t_bl_s, _BL)
-            add_vline(plot_bp, r.t_bl_e, _BL)
-            return
-
-        t_sys_arr = np.asarray(sys_sig.times)
-        v_sys_arr = np.asarray(sys_sig.values)
-        ri, gi, bi, ai = _FILL["baseline"]
-
-        # ── interactive region on BP (drag-whole or drag-edge) ────────────────
-        _brush = pg.mkBrush(ri, gi, bi, ai + 30)
-        region = pg.LinearRegionItem(
-            values=(r.t_bl_s, r.t_bl_e),
-            orientation="vertical",
-            brush=_brush,
-            pen=pg.mkPen(color=_BL, width=2),
-            movable=True,
+        BaselineRegionInteractor(
+            plot_bp, plot_hr, plot_pa, dataset, r,
+            on_changed=on_manual_override,
         )
-        region.setHoverBrush(_brush)   # suppress opacity change on mouse-over
-        region.setZValue(10)   # above ViewBox so it wins mouse events
-        plot_bp.addItem(region, ignoreBounds=True)
-
-        # ── width label (top-centre of region, updated live) ──────────────────
-        width_lbl = pg.TextItem(
-            f"{r.t_bl_e - r.t_bl_s:.1f} s",
-            color=_BL,
-            anchor=(0.5, 0.0),   # top-centre of text at the given position
-        )
-        width_lbl.setZValue(11)
-        plot_bp.addItem(width_lbl, ignoreBounds=True)
-
-        def _update_width_lbl(t0: float, t1: float) -> None:
-            yr = plot_bp.viewRange()[1]
-            y_inset = yr[1] - (yr[1] - yr[0]) * 0.04   # 4 % below the top edge
-            width_lbl.setPos((t0 + t1) / 2, y_inset)
-            width_lbl.setText(f"{t1 - t0:.1f} s")
-
-        _update_width_lbl(r.t_bl_s, r.t_bl_e)
-
-        # ── linked static shades on HR and PA ─────────────────────────────────
-        def _linked_shade(plot: pg.PlotItem) -> pg.LinearRegionItem:
-            sh = pg.LinearRegionItem(
-                values=(r.t_bl_s, r.t_bl_e),
-                orientation="vertical",
-                brush=pg.mkBrush(ri, gi, bi, ai),
-                pen=pg.mkPen(None),
-                movable=False,
-            )
-            sh.setZValue(-10)
-            plot.addItem(sh)
-            return sh
-
-        bl_hr = _linked_shade(plot_hr)
-        bl_pa = _linked_shade(plot_pa)
-
-        # ── updatable avg_sbp line and boundary vlines on BP ──────────────────
-        sbp_hline = pg.InfiniteLine(
-            pos=r.avg_sbp or 0, angle=0,
-            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
-        )
-        vline_s = pg.InfiniteLine(
-            pos=r.t_bl_s, angle=90,
-            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
-        )
-        vline_e = pg.InfiniteLine(
-            pos=r.t_bl_e, angle=90,
-            pen=pg.mkPen(color=_BL, width=1.5, style=_DashLine),
-        )
-        plot_bp.addItem(sbp_hline)
-        plot_bp.addItem(vline_s)
-        plot_bp.addItem(vline_e)
-
-        from autonomiclab.analysis.valsalva import ValsalvaAnalyzer
-
-        # ── A bracket (updatable) on BP ────────────────────────────────────────
-        a_seg: Optional[pg.PlotDataItem] = None
-        a_lbl: Optional[pg.TextItem] = None
-        if r.t_S2es and r.v_nadir is not None and r.avg_sbp and r.A is not None:
-            a_seg = pg.PlotDataItem(
-                x=[r.t_S2es, r.t_S2es], y=[r.v_nadir, r.avg_sbp],
-                pen=pg.mkPen(color=_PII, width=2, style=_DashLine),
-            )
-            plot_bp.addItem(a_seg)
-            a_lbl = pg.TextItem(f"A={r.A:.0f}", color=_PII, anchor=(0.5, 1.0))
-            a_lbl.setPos(r.t_S2es, r.avg_sbp)
-            plot_bp.addItem(a_lbl)
-
-        # ── PRT annotation (updatable) on BP ───────────────────────────────────
-        prt_dot = pg.ScatterPlotItem(
-            x=[r.t_prt_end] if r.t_prt_end else [],
-            y=[r.avg_sbp]   if r.t_prt_end else [],
-            size=8, symbol="o",
-            pen=pg.mkPen(_PIII, width=1.5), brush=pg.mkBrush(_PIII),
-        )
-        prt_hline = pg.PlotDataItem(
-            x=[r.t_S3e, r.t_prt_end] if (r.t_S3e and r.t_prt_end) else [],
-            y=[r.avg_sbp, r.avg_sbp]  if (r.t_S3e and r.t_prt_end) else [],
-            pen=pg.mkPen(color=_PIII, width=2, style=_SolidLine),
-        )
-        prt_lbl = pg.TextItem(
-            f"PRT={r.PRT:.1f}s" if r.PRT else "", color=_PIII, anchor=(0.5, 1.0)
-        )
-        if r.t_prt_end and r.t_S3e and r.avg_sbp:
-            prt_lbl.setPos((r.t_S3e + r.t_prt_end) / 2, r.avg_sbp - 2)
-        plot_bp.addItem(prt_dot)
-        plot_bp.addItem(prt_hline)
-        plot_bp.addItem(prt_lbl)
-
-        # ── live callback ──────────────────────────────────────────────────────
-        def _on_region_changed() -> None:
-            t0, t1 = region.getRegion()
-            r.t_bl_s, r.t_bl_e = t0, t1
-
-            vline_s.setValue(t0)
-            vline_e.setValue(t1)
-            bl_hr.setRegion((t0, t1))
-            bl_pa.setRegion((t0, t1))
-            _update_width_lbl(t0, t1)
-
-            mask = (t_sys_arr >= t0) & (t_sys_arr <= t1)
-            if not np.any(mask):
-                return
-            r.avg_sbp = float(np.mean(v_sys_arr[mask]))
-            sbp_hline.setValue(r.avg_sbp)
-
-            # A
-            if r.v_nadir is not None:
-                r.A = r.avg_sbp - r.v_nadir
-            if a_seg is not None and r.t_S2es:
-                a_seg.setData(x=[r.t_S2es, r.t_S2es], y=[r.v_nadir, r.avg_sbp])
-            if a_lbl is not None and r.t_S2es and r.v_nadir is not None:
-                a_lbl.setPos(r.t_S2es, r.avg_sbp)
-                a_lbl.setText(f"A={r.A:.0f}" if r.A is not None else "")
-
-            # PRT
-            if r.t_S3e:
-                r.t_prt_end, r.PRT = ValsalvaAnalyzer._compute_prt(
-                    t_sys_arr, v_sys_arr, r.t_S3e, r.avg_sbp
-                )
-            if r.t_prt_end and r.t_S3e:
-                prt_dot.setData(x=[r.t_prt_end], y=[r.avg_sbp])
-                prt_hline.setData(
-                    x=[r.t_S3e, r.t_prt_end], y=[r.avg_sbp, r.avg_sbp]
-                )
-                prt_lbl.setPos((r.t_S3e + r.t_prt_end) / 2, r.avg_sbp - 2)
-                prt_lbl.setText(f"PRT={r.PRT:.1f}s" if r.PRT else "PRT")
-
-            # BRSa
-            if r.A is not None and r.B is not None and r.PRT and r.PRT > 0:
-                r.BRSa = (r.A + r.B * 0.75) / r.PRT
-
-            if on_manual_override is not None:
-                on_manual_override(r.t_bl_s, r.t_bl_e)
-
-        region.sigRegionChanged.connect(_on_region_changed)
 
     # ── calibration warning overlay ───────────────────────────────────────────
 
