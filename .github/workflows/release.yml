@@ -79,3 +79,12 @@ jobs:
           files: |
             dist/AutonomicLab_Setup.exe
             dist/UserGuide.pdf
+
+      - name: Upload to OneDrive
+        run: |
+          $config = @'
+          ${{ secrets.RCLONE_CONF }}
+          '@
+          $config | Out-File -FilePath rclone_temp.conf -Encoding utf8
+          rclone --config rclone_temp.conf copy dist\AutonomicLab_Setup.exe RCLONE_CONF:AutonomicLab/
+          Remove-Item rclone_temp.conf
