@@ -237,6 +237,11 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             pass
 
         self._gw.clear()
+        # Force Qt to process deferred C++ object deletions before adding new
+        # items — without this, pyqtgraph on Windows may crash with
+        # "wrapped C/C++ object of type ViewBox has been deleted".
+        from PyQt6.QtWidgets import QApplication
+        QApplication.processEvents()
         plots: list[pg.PlotItem] = []
 
         # ── group plots ───────────────────────────────────────────────────────
