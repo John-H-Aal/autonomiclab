@@ -126,7 +126,15 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         self._gw.setBackground("#c8d8e8")
         outer.addWidget(self._gw, stretch=1)
 
-        self._rebuild()
+        # Debounce rapid checkbox changes — coalesces multiple clicks into
+        # one rebuild that runs when the event loop is idle.
+        from PyQt6.QtCore import QTimer
+        self._rebuild_timer = QTimer(self)
+        self._rebuild_timer.setSingleShot(True)
+        self._rebuild_timer.setInterval(50)
+        self._rebuild_timer.timeout.connect(self._do_rebuild)
+
+        self._do_rebuild()
 
     def _add_signal_info(self, layout: QVBoxLayout, dataset: Dataset) -> None:
         def _sig_info(sig_name: str, unit: str = "mmHg") -> str | None:
@@ -214,16 +222,16 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         plot.getAxis("left").setWidth(RawDataWindow._Y_AXIS_WIDTH)
 
     def _rebuild(self) -> None:
-        if getattr(self, "_rebuilding", False):
-            return
-        self._rebuilding = True
+        # Restart the debounce timer — if called again within 50ms,
+        # only one rebuild fires when the event loop is next idle.
+        self._rebuild_timer.start()
+
+    def _do_rebuild(self) -> None:
         log.debug("_rebuild called")
         try:
             self._rebuild_inner()
         except Exception:
             log.exception("_rebuild crashed")
-        finally:
-            self._rebuilding = False
 
     def _rebuild_inner(self) -> None:
         # Save current X range
@@ -237,11 +245,6 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             pass
 
         self._gw.clear()
-        # Force Qt to process deferred C++ object deletions before adding new
-        # items — without this, pyqtgraph on Windows may crash with
-        # "wrapped C/C++ object of type ViewBox has been deleted".
-        from PyQt6.QtWidgets import QApplication
-        QApplication.processEvents()
         plots: list[pg.PlotItem] = []
 
         # ── group plots ───────────────────────────────────────────────────────
