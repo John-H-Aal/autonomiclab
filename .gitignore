@@ -29,3 +29,7 @@ autonomiclab_icon_preview.png
 # Local data and logs
 data/
 *.log
+
+# Auth runtime files
+users.db
+guest_counter.json
