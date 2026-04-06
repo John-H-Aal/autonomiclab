@@ -34,18 +34,26 @@ def main() -> int:
     splash = None
     if splash_path:
         from autonomiclab import __version__
+        from PyQt6.QtGui import QPainter, QFont, QColor
         pixmap = QPixmap(str(splash_path))
+        painter = QPainter(pixmap)
+        font = QFont("Arial", 11)
+        painter.setFont(font)
+        painter.setPen(QColor(255, 255, 255, 200))
+        margin = 18
+        top = 22
+        painter.drawText(
+            pixmap.rect().adjusted(0, top, -margin, 0),
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
+            f"v{__version__}",
+        )
+        painter.end()
         splash = QSplashScreen(
             pixmap,
             Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint,
         )
         splash.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         splash.show()
-        splash.showMessage(
-            f"v{__version__}",
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
-            Qt.GlobalColor.white,
-        )
         app.processEvents()
 
     def launch():
