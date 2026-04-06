@@ -111,15 +111,36 @@ def draw_icon(size: int) -> Image.Image:
     return img
 
 
+def _build_ico(images: dict) -> bytes:
+    """Build a Windows ICO file with PNG data per size (Vista+ compatible)."""
+    import io, struct
+    entries = []
+    for size in sorted(images):
+        buf = io.BytesIO()
+        images[size].convert("RGBA").save(buf, format="PNG", optimize=False)
+        entries.append((size, buf.getvalue()))
+
+    n = len(entries)
+    header = struct.pack("<HHH", 0, 1, n)
+    offset = 6 + n * 16
+    dir_part = b""
+    for size, data in entries:
+        w = 0 if size == 256 else size   # 0 means 256 in ICO spec
+        dir_part += struct.pack("<BBBBHHII",
+                                w, w, 0, 0, 1, 32, len(data), offset)
+        offset += len(data)
+    return header + dir_part + b"".join(d for _, d in entries)
+
+
 def make_icon():
-    # Draw at high resolution, let PIL resize to all needed sizes
-    base = draw_icon(256).convert("RGBA")
-    base.save(
-        "assets/autonomiclab.ico",
-        format="ICO",
-        sizes=[(16,16), (32,32), (48,48), (64,64), (128,128), (256,256)],
-    )
-    base.save("autonomiclab_icon_preview.png")
+    base  = draw_icon(512).convert("RGBA")
+    imgs  = {s: base.resize((s, s), Image.LANCZOS)
+             for s in [16, 32, 48, 64, 128, 256]}
+
+    with open("assets/autonomiclab.ico", "wb") as f:
+        f.write(_build_ico(imgs))
+
+    imgs[256].save("autonomiclab_icon_preview.png")
     print("icon  → assets/autonomiclab.ico")
 
 
