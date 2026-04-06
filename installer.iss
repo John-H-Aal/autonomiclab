@@ -31,9 +31,10 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional icons:"
 
 [Files]
-Source: "dist\{#AppExeName}";         DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\{#AppExeName}";          DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\autonomiclab_splash.png"; DestDir: "{app}"; Flags: ignoreversion
-Source: "installer_config.yaml";       DestDir: "{app}"; DestName: "config.yaml"; Flags: ignoreversion
+Source: "installer_config.yaml";        DestDir: "{app}"; DestName: "config.yaml"; Flags: ignoreversion
+Source: "dist\UserGuide.pdf";           DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
 Name: "{userdesktop}\{#AppName}";     Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
@@ -62,7 +63,8 @@ begin
       ConfigContent.Add('# AutonomicLab configuration');
       ConfigContent.Add('# Edit data_folder to match the location of your Finapres data');
       ConfigContent.Add('');
-      ConfigContent.Add('data_folder: "' + StringReplace(DocsPath, '\', '/', [rfReplaceAll]) + '"');
+      StringChangeEx(DocsPath, '\', '/', True);
+      ConfigContent.Add('data_folder: "' + DocsPath + '"');
       ConfigContent.SaveToFile(ConfigFile);
     finally
       ConfigContent.Free;
