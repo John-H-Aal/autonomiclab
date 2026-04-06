@@ -71,28 +71,7 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         # ── left panel ────────────────────────────────────────────────────────
         panel = QWidget()
         panel.setFixedWidth(210)
-        panel.setStyleSheet("""
-            background: #f5f5f5;
-            QCheckBox {
-                spacing: 6px;
-                font-size: 12px;
-            }
-            QCheckBox::indicator {
-                width: 14px;
-                height: 14px;
-                border: 1px solid #888;
-                border-radius: 3px;
-                background: white;
-            }
-            QCheckBox::indicator:checked {
-                background: #2979ff;
-                border-color: #2979ff;
-                image: none;
-            }
-            QCheckBox::indicator:hover {
-                border-color: #2979ff;
-            }
-        """)
+        panel.setStyleSheet("background: #f5f5f5;")
         pl = QVBoxLayout()
         pl.setContentsMargins(10, 12, 10, 12)
         pl.setSpacing(4)
@@ -103,7 +82,7 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             avail = any(dataset.has_signal(sk) for sk, _, _ in sigs)
             if not avail:
                 continue
-            cb = QCheckBox(grp_key)
+            cb = self._make_cb(grp_key)
             cb.setChecked(default_on)
             cb.stateChanged.connect(lambda _: self._rebuild())
             pl.addWidget(cb)
@@ -115,7 +94,7 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             pl.addSpacing(8)
             pl.addWidget(QLabel("<b>ECG Leads</b>"))
             for sig_name, _ in self._ecg_avail:
-                cb = QCheckBox(sig_name)
+                cb = self._make_cb(sig_name)
                 cb.setChecked(sig_name in self._ECG_DEFAULT_ON)
                 cb.stateChanged.connect(lambda _: self._rebuild())
                 pl.addWidget(cb)
@@ -127,7 +106,7 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         if has_ptt:
             pl.addSpacing(8)
             pl.addWidget(QLabel("<b>Derived</b>"))
-            self._ptt_cb = QCheckBox("PTT (ms)")
+            self._ptt_cb = self._make_cb("PTT (ms)")
             self._ptt_cb.setChecked(False)
             self._ptt_cb.stateChanged.connect(lambda _: self._rebuild())
             pl.addWidget(self._ptt_cb)
@@ -196,6 +175,34 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         layout.addWidget(row_w)
 
     # ── plot rebuild ──────────────────────────────────────────────────────────
+
+    _CB_STYLE = """
+        QCheckBox {
+            spacing: 6px;
+            font-size: 12px;
+        }
+        QCheckBox::indicator {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #888;
+            border-radius: 3px;
+            background: white;
+        }
+        QCheckBox::indicator:checked {
+            background: #2979ff;
+            border-color: #2979ff;
+            image: none;
+        }
+        QCheckBox::indicator:hover {
+            border-color: #2979ff;
+        }
+    """
+
+    @classmethod
+    def _make_cb(cls, label: str) -> "QCheckBox":
+        cb = QCheckBox(label)
+        cb.setStyleSheet(cls._CB_STYLE)
+        return cb
 
     _Y_AXIS_WIDTH = 62  # px — fixed so all plot areas align vertically
 
