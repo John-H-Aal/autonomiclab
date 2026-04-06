@@ -4,10 +4,15 @@
 venv\Scripts\activate
 
 pyinstaller --onefile --windowed --name AutonomicLab `
+  --icon "assets/autonomiclab.ico" `
+  --splash "assets/autonomiclab_splash.png" `
   --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
   autonomiclab/__main__.py
 
-# Copy config.yaml to dist\ (create default if not present)
+# Copy assets to dist\
+Copy-Item "assets\autonomiclab_splash.png" "dist\autonomiclab_splash.png"
+
+# Copy config.yaml to dist\
 if (Test-Path "config.yaml") {
     Copy-Item "config.yaml" "dist\config.yaml"
 } else {

@@ -22,6 +22,7 @@ wheels/
 *.pyc
 .vscode/
 config.yaml
+autonomiclab_icon_preview.png
 .idea/
 venv/
 venv/
