@@ -74,9 +74,7 @@ begin
       StringChangeEx(DocsPath, '\', '/', True);
       ConfigContent.Add('data_folder: "' + DocsPath + '"');
       ConfigContent.Add('');
-      ConfigContent.Add('# URL til Dropbox-deling af users.db (lad stå tom for at deaktivere sync)');
-      ConfigContent.Add('# Dropbox: kopiér delingslink og erstat ?dl=0 med ?dl=1');
-      ConfigContent.Add('# users_db_url: "https://www.dropbox.com/..."');
+      ConfigContent.Add('users_db_url: "https://www.dropbox.com/scl/fi/umzudbbk5rk57hapty1kp/users.db?rlkey=ick7tco73y3m1eqrpvvhttjva&st=o7s9vf1b&dl=1"');
       ConfigContent.SaveToFile(ConfigFile);
     finally
       ConfigContent.Free;
