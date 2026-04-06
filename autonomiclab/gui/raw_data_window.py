@@ -71,7 +71,28 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         # ── left panel ────────────────────────────────────────────────────────
         panel = QWidget()
         panel.setFixedWidth(210)
-        panel.setStyleSheet("background:#f5f5f5;")
+        panel.setStyleSheet("""
+            background: #f5f5f5;
+            QCheckBox {
+                spacing: 6px;
+                font-size: 12px;
+            }
+            QCheckBox::indicator {
+                width: 14px;
+                height: 14px;
+                border: 1px solid #888;
+                border-radius: 3px;
+                background: white;
+            }
+            QCheckBox::indicator:checked {
+                background: #2979ff;
+                border-color: #2979ff;
+                image: none;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #2979ff;
+            }
+        """)
         pl = QVBoxLayout()
         pl.setContentsMargins(10, 12, 10, 12)
         pl.setSpacing(4)

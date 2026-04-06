@@ -77,7 +77,8 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("AutonomicLab — GAT Protocol Analysis")
+        from autonomiclab import __version__
+        self.setWindowTitle(f"AutonomicLab v{__version__} — GAT Protocol Analysis")
 
         FontLoader.load()
         self._settings = AppSettings()

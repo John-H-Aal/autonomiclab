@@ -26,6 +26,13 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Set version from tag
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          (Get-Content autonomiclab/__init__.py) `
+            -replace '__version__ = ".*"', "__version__ = `"$version`"" |
+            Set-Content autonomiclab/__init__.py
+
       - name: Install tools
         run: choco install upx innosetup pandoc --yes
 

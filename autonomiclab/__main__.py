@@ -33,6 +33,7 @@ def main() -> int:
     splash_path = _find_splash_image()
     splash = None
     if splash_path:
+        from autonomiclab import __version__
         pixmap = QPixmap(str(splash_path))
         splash = QSplashScreen(
             pixmap,
@@ -40,6 +41,11 @@ def main() -> int:
         )
         splash.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         splash.show()
+        splash.showMessage(
+            f"v{__version__}",
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
+            Qt.GlobalColor.white,
+        )
         app.processEvents()
 
     def launch():
