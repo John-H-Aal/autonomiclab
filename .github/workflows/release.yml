@@ -73,7 +73,12 @@ jobs:
       - name: Build installer
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
-          iscc /DAppVersion=$version installer.iss
+          $password = "${{ secrets.INSTALLER_PASSWORD }}"
+          if ($password) {
+            iscc /DAppVersion=$version /DAppPassword=$password installer.iss
+          } else {
+            iscc /DAppVersion=$version installer.iss
+          }
 
       - name: Upload installer to release
         uses: softprops/action-gh-release@v2

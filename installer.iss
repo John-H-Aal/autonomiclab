@@ -25,6 +25,10 @@ WizardStyle=modern
 PrivilegesRequired=lowest
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#AppExeName}
+#ifdef AppPassword
+Password={#AppPassword}
+Encryption=yes
+#endif
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
