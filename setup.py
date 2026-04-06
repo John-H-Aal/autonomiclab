@@ -7,7 +7,7 @@ setup(
     description="GAT Protocol Analysis Tool for Autonomic Nervous System Assessment",
     author="Astrid Juhl Terkelsen",
     author_email="astrid.terkelsen@clin.au.dk",
-    url="https://github.com/yourusername/autonomiclab",
+    url="https://github.com/John-H-Aal/autonomiclab",
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[
