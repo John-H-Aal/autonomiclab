@@ -25,3 +25,7 @@ config.yaml
 
 # Generated previews
 autonomiclab_icon_preview.png
+
+# Local data and logs
+data/
+*.log
