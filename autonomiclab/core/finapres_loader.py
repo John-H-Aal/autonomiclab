@@ -62,8 +62,10 @@ def load_csv_signal(
                 try:
                     parts = line.split(";")
                     if len(parts) >= 2:
-                        times.append(float(parts[0]))
-                        values.append(float(parts[1]))
+                        t = float(parts[0])
+                        v = float(parts[1])   # raises ValueError if blank
+                        times.append(t)
+                        values.append(v)
                 except ValueError:
                     continue
     except FileNotFoundError:
