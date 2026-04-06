@@ -56,8 +56,11 @@ jobs:
       - name: Copy splash to dist
         run: Copy-Item "assets\autonomiclab_splash.png" "dist\autonomiclab_splash.png"
 
+      - name: Install wkhtmltopdf
+        run: choco install wkhtmltopdf --yes
+
       - name: Generate PDF user guide
-        run: pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=weasyprint
+        run: pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf
         continue-on-error: true
 
       - name: Create installer config template
