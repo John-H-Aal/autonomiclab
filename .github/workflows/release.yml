@@ -40,7 +40,6 @@ jobs:
         run: |
           pyinstaller --clean --onefile --windowed --name AutonomicLab `
             --icon "assets/autonomiclab.ico" `
-            --splash "assets/autonomiclab_splash.png" `
             --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
             --upx-dir "C:/ProgramData/chocolatey/bin" `
             --exclude-module PyQt6.QtWebEngineWidgets `

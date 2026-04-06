@@ -56,14 +56,6 @@ def main() -> int:
         splash.show()
         app.processEvents()
 
-        # Close PyInstaller splash immediately so our custom splash
-        # (with version text) is not hidden behind it for 2.5 s
-        try:
-            import pyi_splash  # type: ignore
-            pyi_splash.close()
-        except ImportError:
-            pass
-
     def launch():
         window = MainWindow()
         window.show()

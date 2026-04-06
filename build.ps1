@@ -5,7 +5,6 @@ venv\Scripts\activate
 
 pyinstaller --clean --onefile --windowed --name AutonomicLab `
   --icon "assets/autonomiclab.ico" `
-  --splash "assets/autonomiclab_splash.png" `
   --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
   --exclude-module PyQt6.QtWebEngineWidgets `
   --exclude-module PyQt6.QtBluetooth `
