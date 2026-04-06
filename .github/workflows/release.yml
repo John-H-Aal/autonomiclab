@@ -1,0 +1,52 @@
+name: Build and Release Windows EXE
+
+on:
+  push:
+    tags:
+      - 'v*'   # triggers on tags like v1.0.0, v1.2.3
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build EXE
+        run: |
+          pyinstaller --clean --onefile --windowed --name AutonomicLab `
+            --icon "assets/autonomiclab.ico" `
+            --splash "assets/autonomiclab_splash.png" `
+            --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
+            autonomiclab/__main__.py
+
+      - name: Create default config.yaml
+        run: |
+          @"
+          # AutonomicLab configuration
+          # Edit data_folder to match the data location on this computer
+
+          data_folder: "C:/Users/Public/Documents/AutonomicLab/data"
+          "@ | Out-File -FilePath dist\config.yaml -Encoding utf8
+
+      - name: Copy splash screen
+        run: Copy-Item "assets\autonomiclab_splash.png" "dist\autonomiclab_splash.png"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AutonomicLab.exe
+            dist/config.yaml
+            dist/autonomiclab_splash.png
