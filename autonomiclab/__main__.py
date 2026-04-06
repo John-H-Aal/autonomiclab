@@ -56,28 +56,25 @@ def main() -> int:
         splash.show()
         app.processEvents()
 
-    def launch():
-        window = MainWindow()
-        window.show()
-        if splash:
-            splash.finish(window)
-
-        # Close PyInstaller splash
+        # Close PyInstaller splash immediately so our custom splash
+        # (with version text) is not hidden behind it for 2.5 s
         try:
             import pyi_splash  # type: ignore
             pyi_splash.close()
         except ImportError:
             pass
 
+    def launch():
+        window = MainWindow()
+        window.show()
+        if splash:
+            splash.finish(window)
+
     # Delay main window by 2.5s so splash is clearly visible
     SPLASH_MS = 2500 if splash else 0
     QTimer.singleShot(SPLASH_MS, launch)
 
     return app.exec()
-
-
-if __name__ == "__main__":
-    sys.exit(main())
 
 
 if __name__ == "__main__":
