@@ -43,8 +43,10 @@ Source: "installer_config.yaml";        DestDir: "{app}"; DestName: "config.yaml
 Source: "dist\UserGuide.pdf";           DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
-Name: "{userdesktop}\{#AppName}";     Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{userdesktop}\{#AppName}";          Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{userdesktop}\{#AppName} User Guide"; Filename: "{app}\UserGuide.pdf"; Tasks: desktopicon; Check: FileExists(ExpandConstant('{app}\UserGuide.pdf'))
 Name: "{userprograms}\{#AppName}\{#AppName}"; Filename: "{app}\{#AppExeName}"
+Name: "{userprograms}\{#AppName}\User Guide"; Filename: "{app}\UserGuide.pdf"; Check: FileExists(ExpandConstant('{app}\UserGuide.pdf'))
 Name: "{userprograms}\{#AppName}\Uninstall"; Filename: "{uninstallexe}"
 
 [Dirs]
