@@ -1,9 +1,9 @@
-name: Build and Release Windows EXE
+name: Build and Release Windows Installer
 
 on:
   push:
     tags:
-      - 'v*'   # triggers on tags like v1.0.0, v1.2.3
+      - 'v*'   # triggers on tags like v1.0.0
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
           pip install pyinstaller
@@ -31,22 +31,24 @@ jobs:
             --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
             autonomiclab/__main__.py
 
-      - name: Create default config.yaml
+      - name: Copy splash to dist
+        run: Copy-Item "assets\autonomiclab_splash.png" "dist\autonomiclab_splash.png"
+
+      - name: Create installer config template
         run: |
           @"
           # AutonomicLab configuration
-          # Edit data_folder to match the data location on this computer
-
+          # This file is updated automatically during installation
           data_folder: "C:/Users/Public/Documents/AutonomicLab/data"
-          "@ | Out-File -FilePath dist\config.yaml -Encoding utf8
+          "@ | Out-File -FilePath installer_config.yaml -Encoding utf8
 
-      - name: Copy splash screen
-        run: Copy-Item "assets\autonomiclab_splash.png" "dist\autonomiclab_splash.png"
+      - name: Install Inno Setup
+        run: choco install innosetup --yes
 
-      - name: Upload release assets
+      - name: Build installer
+        run: iscc installer.iss
+
+      - name: Upload installer to release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/AutonomicLab.exe
-            dist/config.yaml
-            dist/autonomiclab_splash.png
+          files: dist/AutonomicLab_Setup.exe

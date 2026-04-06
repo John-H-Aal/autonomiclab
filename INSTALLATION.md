@@ -1,71 +1,36 @@
 # Installing AutonomicLab on Windows 11
 
-## Step 1 — Download the program
+## Step 1 — Download the installer
 
-1. Go to: `https://github.com/John-H-Aal/autonomiclab/releases/latest`
-2. Under **Assets**, download all three files:
-   - `AutonomicLab.exe`
-   - `config.yaml`
-   - `autonomiclab_splash.png`
-3. Place all three files in the same folder, for example:
-   ```
-   C:\Users\YourName\Documents\AutonomicLab\
-   ```
+Go to: `https://github.com/John-H-Aal/autonomiclab/releases/latest`
 
-> **Important:** All three files must be in the same folder.
+Click **AutonomicLab_Setup.exe** to download.
 
----
+## Step 2 — Run the installer
 
-## Step 2 — Allow the program to run
+1. Double-click `AutonomicLab_Setup.exe`
+2. If Windows SmartScreen appears: click **More info** → **Run anyway**
+3. Follow the setup wizard — click **Next** and **Install**
+4. Optionally check **Create a desktop shortcut**
+5. Click **Finish** — AutonomicLab starts automatically
 
-Windows may block the program the first time. Do one of the following:
+## Step 3 — Place your data files
 
-**Option A — File properties:**
-1. Right-click `AutonomicLab.exe` → **Properties**
-2. At the bottom, check **Unblock** → click **OK**
+The installer creates this folder automatically:
+```
+C:\Users\YourName\Documents\AutonomicLab\data\
+```
+Copy your Finapres dataset folders here.
 
-**Option B — SmartScreen warning:**
-If a blue warning appears when starting the program:
-1. Click **More info**
-2. Click **Run anyway**
+## Step 4 — Configure data path (if needed)
 
----
+If your data is stored elsewhere, open `config.yaml` in the installation folder
+and change the `data_folder` path:
 
-## Step 3 — Configure data folder
-
-Open `config.yaml` in Notepad and set the path to your data folder:
-
-```yaml
-data_folder: "C:/Users/YourName/Documents/data"
+```
+C:\Users\YourName\AppData\Local\AutonomicLab\config.yaml
 ```
 
-Save the file.
+## Uninstalling
 
----
-
-## Step 4 — Start the program
-
-Double-click `AutonomicLab.exe`.
-
-To create a desktop shortcut:
-- Right-click `AutonomicLab.exe` → **Send to** → **Desktop (create shortcut)**
-
----
-
-## Using the program
-
-1. Click **Select Dataset** in the left panel
-2. Navigate to a folder containing Finapres data files
-3. Select the test type (Valsalva / Stand Test / Deep Breathing)
-4. Use **Export Excel** to save results
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| Program does not start | Make sure all 3 files are in the same folder |
-| Data folder not found | Edit `config.yaml` with the correct path |
-| Windows blocks the program | See Step 2 above |
-| Plots are empty | Check that the Finapres CSV files are in the selected folder |
+**Settings** → **Apps** → search for *AutonomicLab* → **Uninstall**
