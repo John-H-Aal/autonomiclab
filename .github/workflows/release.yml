@@ -34,7 +34,7 @@ jobs:
             Set-Content autonomiclab/__init__.py
 
       - name: Install tools
-        run: choco install upx innosetup pandoc --yes
+        run: choco install upx innosetup pandoc rclone --yes
 
       - name: Build EXE
         run: |
