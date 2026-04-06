@@ -59,7 +59,7 @@ jobs:
         run: choco install wkhtmltopdf --yes
 
       - name: Generate PDF user guide
-        run: pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf
+        run: pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf --css docs/user_guide.css
         continue-on-error: true
 
       - name: Create installer config template

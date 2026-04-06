@@ -2,11 +2,7 @@
 
 ## Starting the program
 
-Double-click `AutonomicLab.exe` on your desktop, or run:
-
-```bash
-python -m autonomiclab
-```
+Double-click `AutonomicLab.exe` on your desktop.
 
 A splash screen appears while the program loads.
 
