@@ -318,9 +318,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
             QFileDialog.Option.ShowDirsOnly,
         )
         if folder:
-            folder_path = Path(folder)
-            self._settings.data_folder = folder_path
-            self._ctrl.load_dataset(folder_path)
+            self._ctrl.load_dataset(Path(folder))
 
     def _on_phase_changed(self) -> None:
         self.update_markers_table()

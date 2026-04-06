@@ -70,17 +70,10 @@ class AppSettings:
 
     @property
     def data_folder(self) -> Path:
-        """Last used folder (user pref) → config.yaml default → fallback."""
-        if saved := self._prefs.get("data_folder"):
-            return Path(saved)
+        """Default data folder from config.yaml, falling back to ~/Documents/data."""
         if configured := self._config.get("data_folder"):
             return Path(configured)
         return _DEFAULT_DATA_FOLDER
-
-    @data_folder.setter
-    def data_folder(self, value: Path) -> None:
-        self._prefs["data_folder"] = str(value)
-        self.save()
 
     @property
     def allowed_users(self) -> list[str]:
