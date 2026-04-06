@@ -3,7 +3,10 @@ name: Build and Release Windows Installer
 on:
   push:
     tags:
-      - 'v*'   # triggers on tags like v1.0.0
+      - 'v*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -23,12 +26,24 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Install UPX and Inno Setup
+        run: choco install upx innosetup --yes
+
       - name: Build EXE
         run: |
           pyinstaller --clean --onefile --windowed --name AutonomicLab `
             --icon "assets/autonomiclab.ico" `
             --splash "assets/autonomiclab_splash.png" `
             --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
+            --upx-dir "C:/ProgramData/chocolatey/bin" `
+            --exclude-module PyQt6.QtWebEngineWidgets `
+            --exclude-module PyQt6.QtBluetooth `
+            --exclude-module PyQt6.QtMultimedia `
+            --exclude-module PyQt6.Qt3DCore `
+            --exclude-module PyQt6.QtNfc `
+            --exclude-module matplotlib `
+            --exclude-module pandas `
+            --exclude-module tkinter `
             autonomiclab/__main__.py
 
       - name: Copy splash to dist
@@ -41,9 +56,6 @@ jobs:
           # This file is updated automatically during installation
           data_folder: "C:/Users/Public/Documents/AutonomicLab/data"
           "@ | Out-File -FilePath installer_config.yaml -Encoding utf8
-
-      - name: Install Inno Setup
-        run: choco install innosetup --yes
 
       - name: Build installer
         run: iscc installer.iss
