@@ -112,17 +112,14 @@ def draw_icon(size: int) -> Image.Image:
 
 
 def make_icon():
-    # Draw once at high resolution, scale down with LANCZOS for crisp results
-    base   = draw_icon(512)
-    sizes  = [16, 32, 48, 64, 128, 256]
-    images = [base.resize((s, s), Image.LANCZOS) for s in sizes]
-
-    images[0].save("assets/autonomiclab.ico", format="ICO",
-                   sizes=[(s, s) for s in sizes],
-                   append_images=images[1:])
-
-    # Preview at 256px
-    images[-1].save("autonomiclab_icon_preview.png")
+    # Draw at high resolution, let PIL resize to all needed sizes
+    base = draw_icon(256).convert("RGBA")
+    base.save(
+        "assets/autonomiclab.ico",
+        format="ICO",
+        sizes=[(16,16), (32,32), (48,48), (64,64), (128,128), (256,256)],
+    )
+    base.save("autonomiclab_icon_preview.png")
     print("icon  → assets/autonomiclab.ico")
 
 
