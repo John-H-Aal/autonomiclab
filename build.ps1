@@ -1,0 +1,25 @@
+# AutonomicLab build script
+# Run from project root with: .\build.ps1
+
+venv\Scripts\activate
+
+pyinstaller --onefile --windowed --name AutonomicLab `
+  --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
+  autonomiclab/__main__.py
+
+# Copy config.yaml to dist\ (create default if not present)
+if (Test-Path "config.yaml") {
+    Copy-Item "config.yaml" "dist\config.yaml"
+} else {
+    @"
+# AutonomicLab configuration
+# Place this file in the same folder as AutonomicLab.exe
+
+data_folder: "C:/Users/johnh/Documents/data"
+"@ | Out-File -FilePath "dist\config.yaml" -Encoding utf8
+}
+
+Write-Host ""
+Write-Host "Build complete! Files in dist\"
+Write-Host "  AutonomicLab.exe"
+Write-Host "  config.yaml"
