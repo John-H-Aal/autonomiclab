@@ -1,7 +1,9 @@
 ; AutonomicLab Inno Setup Script
 
 #define AppName "AutonomicLab"
-#define AppVersion "1.0.0"
+#ifndef AppVersion
+  #define AppVersion "1.0.0"
+#endif
 #define AppPublisher "Astrid Juhl Terkelsen, Aarhus University"
 #define AppURL "https://github.com/John-H-Aal/autonomiclab"
 #define AppExeName "AutonomicLab.exe"

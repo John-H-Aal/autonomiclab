@@ -62,7 +62,9 @@ jobs:
           "@ | Out-File -FilePath installer_config.yaml -Encoding utf8
 
       - name: Build installer
-        run: iscc installer.iss
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          iscc /DAppVersion=$version installer.iss
 
       - name: Upload installer to release
         uses: softprops/action-gh-release@v2
