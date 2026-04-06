@@ -4,6 +4,12 @@
 
 Double-click `AutonomicLab.exe` on your desktop.
 
+**Windows SmartScreen warning:** The first time you run the installer or the program,
+Windows may display a blue warning screen saying *"Windows protected your PC"*.
+This is expected for software without a commercial code-signing certificate.
+
+Click **More info**, then **Run anyway** to proceed.
+
 A splash screen appears while the program loads.
 
 ---
