@@ -1,9 +1,33 @@
 """Entry point for AutonomicLab application."""
 
+import logging
 import sys
+import traceback
 from pathlib import Path
 
 from autonomiclab.utils.logger import configure_root_logger
+
+
+def _log_path() -> Path:
+    """Return path to log file next to the exe (installed) or in project root (dev)."""
+    if getattr(sys, "frozen", False):
+        # PyInstaller bundle — write next to the .exe
+        base = Path(sys.executable).parent
+    else:
+        base = Path(__file__).parent.parent
+    return base / "autonomiclab.log"
+
+
+def _install_exception_hook(log: logging.Logger) -> None:
+    """Catch any unhandled exception and write it to the log before crashing."""
+    def _hook(exc_type, exc_value, exc_tb):
+        log.critical(
+            "Unhandled exception:\n%s",
+            "".join(traceback.format_exception(exc_type, exc_value, exc_tb)),
+        )
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = _hook
 
 
 def _find_splash_image() -> Path | None:
@@ -21,7 +45,12 @@ def _find_splash_image() -> Path | None:
 
 
 def main() -> int:
-    configure_root_logger()
+    log_file = _log_path()
+    configure_root_logger(log_file=log_file)
+
+    log = logging.getLogger(__name__)
+    log.info("AutonomicLab starting — log: %s", log_file)
+    _install_exception_hook(log)
 
     from PyQt6.QtCore import Qt, QTimer
     from PyQt6.QtGui import QPixmap

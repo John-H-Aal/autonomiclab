@@ -207,6 +207,13 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         plot.getAxis("left").setWidth(RawDataWindow._Y_AXIS_WIDTH)
 
     def _rebuild(self) -> None:
+        log.debug("_rebuild called")
+        try:
+            self._rebuild_inner()
+        except Exception:
+            log.exception("_rebuild crashed")
+
+    def _rebuild_inner(self) -> None:
         # Save current X range
         x_range = None
         try:
