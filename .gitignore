@@ -21,6 +21,7 @@ wheels/
 .DS_Store
 *.pyc
 .vscode/
+config.yaml
 .idea/
 venv/
 venv/
