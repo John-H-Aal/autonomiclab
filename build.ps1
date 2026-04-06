@@ -7,6 +7,14 @@ pyinstaller --clean --onefile --windowed --name AutonomicLab `
   --icon "assets/autonomiclab.ico" `
   --splash "assets/autonomiclab_splash.png" `
   --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
+  --exclude-module PyQt6.QtWebEngineWidgets `
+  --exclude-module PyQt6.QtBluetooth `
+  --exclude-module PyQt6.QtMultimedia `
+  --exclude-module PyQt6.Qt3DCore `
+  --exclude-module PyQt6.QtNfc `
+  --exclude-module matplotlib `
+  --exclude-module pandas `
+  --exclude-module tkinter `
   autonomiclab/__main__.py
 
 # Copy assets to dist\

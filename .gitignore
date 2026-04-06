@@ -1,31 +1,27 @@
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
 *.egg
-.DS_Store
-*.pyc
-.vscode/
-config.yaml
-autonomiclab_icon_preview.png
-.idea/
-venv/
-venv/
-__pycache__/
 *.egg-info/
-*.pyc
+.eggs/
+
+# Virtual environment
+venv/
+
+# Build artifacts
+build/
+dist/
+*.spec
+installer_config.yaml
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Local config (machine-specific)
+config.yaml
+
+# Generated previews
+autonomiclab_icon_preview.png
