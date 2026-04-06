@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
     QStyledItemDelegate, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
+from autonomiclab.auth import session as auth_session
 from autonomiclab.config.app_settings import AppSettings
 from autonomiclab.config.font_loader import FontLoader
 from autonomiclab.core import overrides as override_store
@@ -278,6 +279,23 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         central.setLayout(main_layout)
 
         self.statusBar().showMessage("Ready  |  Select a dataset to begin")
+        self._init_menu_bar()
+
+    def _init_menu_bar(self) -> None:
+        if not auth_session.is_admin():
+            return
+        menu_bar = self.menuBar()
+        admin_menu = menu_bar.addMenu("Admin")
+
+        manage_action = admin_menu.addAction("Administrer brugere…")
+        manage_action.triggered.connect(self._show_admin_panel)
+
+    def _show_admin_panel(self) -> None:
+        from autonomiclab.auth.user_store import UserStore
+        from autonomiclab.gui.auth.admin_panel import AdminPanel
+        store = UserStore(self._settings.users_db_path)
+        dlg   = AdminPanel(store, parent=self)
+        dlg.exec()
 
     def showEvent(self, event) -> None:
         super().showEvent(event)

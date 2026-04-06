@@ -73,6 +73,9 @@ begin
       ConfigContent.Add('');
       StringChangeEx(DocsPath, '\', '/', True);
       ConfigContent.Add('data_folder: "' + DocsPath + '"');
+      ConfigContent.Add('');
+      ConfigContent.Add('# URL til OneDrive-deling af users.db (lad stå tom for at deaktivere sync)');
+      ConfigContent.Add('# users_db_url: "https://..."');
       ConfigContent.SaveToFile(ConfigFile);
     finally
       ConfigContent.Free;

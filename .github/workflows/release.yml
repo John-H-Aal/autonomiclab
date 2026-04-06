@@ -42,6 +42,10 @@ jobs:
             --icon "assets/autonomiclab.ico" `
             --add-data "autonomiclab/config/fonts.yaml;autonomiclab/config" `
             --upx-dir "C:/ProgramData/chocolatey/bin" `
+            --hidden-import bcrypt `
+            --hidden-import cryptography `
+            --hidden-import cryptography.hazmat.primitives.kdf.pbkdf2 `
+            --hidden-import cryptography.hazmat.backends.openssl `
             --exclude-module PyQt6.QtWebEngineWidgets `
             --exclude-module PyQt6.QtBluetooth `
             --exclude-module PyQt6.QtMultimedia `

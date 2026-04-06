@@ -86,6 +86,35 @@ def main() -> int:
         app.processEvents()
 
     def launch():
+        from autonomiclab.config.app_settings import AppSettings
+        from autonomiclab.auth.user_store import UserStore
+        from autonomiclab.auth.guest_counter import GuestCounterStore
+        from autonomiclab.auth.sync import sync_users_db
+        from autonomiclab.gui.auth.login_dialog import LoginDialog
+        from PyQt6.QtWidgets import QDialog
+
+        settings     = AppSettings()
+        db_path      = settings.users_db_path
+        counter_path = db_path.parent / "guest_counter.json"
+
+        # Try to pull a fresher users.db from OneDrive (silently skipped offline).
+        if settings.users_db_url:
+            sync_users_db(settings.users_db_url, db_path)
+
+        store   = UserStore(db_path)
+        counter = GuestCounterStore(counter_path)
+
+        # First-run: no users exist yet — go straight in (setup mode).
+        if not store.has_any_user():
+            log.warning("No users in database — bypassing login (first run)")
+        else:
+            dlg = LoginDialog(store, counter)
+            if splash:
+                splash.finish(dlg)
+            if dlg.exec() != QDialog.DialogCode.Accepted:
+                app.quit()
+                return
+
         window = MainWindow()
         window.show()
         if splash:

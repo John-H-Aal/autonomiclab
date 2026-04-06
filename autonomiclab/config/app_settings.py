@@ -81,6 +81,16 @@ class AppSettings:
         return self._config.get("allowed_users") or []
 
     @property
+    def users_db_url(self) -> str:
+        """OneDrive (or other) direct-download URL for users.db.  Empty = no sync."""
+        return self._config.get("users_db_url") or ""
+
+    @property
+    def users_db_path(self) -> Path:
+        """Local path for the encrypted users database."""
+        return _app_dir() / "users.db"
+
+    @property
     def ui_zoom(self) -> int:
         return int(self._prefs.get("ui_zoom", 100))
 
