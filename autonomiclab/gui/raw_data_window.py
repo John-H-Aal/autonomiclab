@@ -170,9 +170,14 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
                 t, v = sig.times, sig.values
                 if grp_key == "HR" and sig_key in ("HR ECG (RR-int)", "HR AP"):
                     pw.plot(t, v, pen=pg.mkPen(color=color, width=1.5), name=leg_name)
-                    pw.plot(t, v, pen=None, symbol="o", symbolSize=4,
-                            symbolPen=pg.mkPen(color, width=1),
-                            symbolBrush=pg.mkBrush(color))
+                    # Use ScatterPlotItem directly — avoids PlotDataItem.viewRangeChanged
+                    # crash when the internal C++ scatter object is stale after hide/show.
+                    sc = pg.ScatterPlotItem(
+                        t, v, size=4,
+                        pen=pg.mkPen(color, width=1),
+                        brush=pg.mkBrush(color),
+                    )
+                    pw.addItem(sc)
                 else:
                     pw.plot(t, v, pen=pg.mkPen(color=color, width=1.5), name=leg_name)
 
@@ -181,9 +186,12 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
                 hr_ap = dataset.get_signal("HR AP")
                 if rebap and hr_ap:
                     mark_y = np.interp(hr_ap.times, rebap.times, rebap.values)
-                    pw.plot(hr_ap.times, mark_y, pen=None, symbol="o", symbolSize=5,
-                            symbolPen=pg.mkPen("#8B0000", width=1),
-                            symbolBrush=pg.mkBrush("#8B000044"))
+                    sc = pg.ScatterPlotItem(
+                        hr_ap.times, mark_y, size=5,
+                        pen=pg.mkPen("#8B0000", width=1),
+                        brush=pg.mkBrush("#8B000044"),
+                    )
+                    pw.addItem(sc)
 
             if has_data:
                 pw.hide()
@@ -238,9 +246,12 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             pw.showGrid(x=True, y=True, alpha=0.3)
             pw.setLabel("left", "PTT (ms)")
             pw.plot(t_ap, ptt_ms, pen=pg.mkPen(color="#555555", width=1.5))
-            pw.plot(t_ap, ptt_ms, pen=None, symbol="o", symbolSize=4,
-                    symbolPen=pg.mkPen("#555555", width=1),
-                    symbolBrush=pg.mkBrush("#555555"))
+            sc = pg.ScatterPlotItem(
+                t_ap, ptt_ms, size=4,
+                pen=pg.mkPen("#555555", width=1),
+                brush=pg.mkBrush("#555555"),
+            )
+            pw.addItem(sc)
             pw.addItem(pg.InfiniteLine(
                 pos=0, angle=0,
                 pen=pg.mkPen("#aaaaaa", width=1,
@@ -342,12 +353,16 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
             self._rebuild_timer.start()
             return
         self._rebuilding = True
+        # Suppress all paint events during layout manipulation so Qt never
+        # tries to paint an AxisItem/ScatterPlotItem while we're hiding widgets.
+        self._plot_container.setUpdatesEnabled(False)
         try:
             self._rebuild_inner()
         except Exception:
             log.exception("_rebuild crashed")
         finally:
             self._rebuilding = False
+            self._plot_container.setUpdatesEnabled(True)
 
     def _rebuild_inner(self) -> None:
         # Snapshot checkbox states as plain Python booleans.

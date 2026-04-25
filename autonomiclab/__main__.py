@@ -19,12 +19,18 @@ def _log_path() -> Path:
 
 
 def _install_exception_hook(log: logging.Logger) -> None:
-    """Catch any unhandled exception and write it to the log before crashing."""
+    """Catch any unhandled exception and write it to the log before crashing.
+
+    RuntimeErrors about deleted C++ Qt objects (pyqtgraph stale-pointer bugs)
+    are logged as warnings and swallowed — they don't corrupt application state
+    and must not take down the process.
+    """
     def _hook(exc_type, exc_value, exc_tb):
-        log.critical(
-            "Unhandled exception:\n%s",
-            "".join(traceback.format_exception(exc_type, exc_value, exc_tb)),
-        )
+        msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        if exc_type is RuntimeError and "deleted" in str(exc_value):
+            log.warning("Suppressed pyqtgraph stale C++ object error:\n%s", msg)
+            return
+        log.critical("Unhandled exception:\n%s", msg)
         sys.__excepthook__(exc_type, exc_value, exc_tb)
 
     sys.excepthook = _hook

@@ -133,6 +133,14 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         )
         left_layout.addWidget(self.select_button)
 
+        self.load_nsc_button = QPushButton("Load .nsc File")
+        self.load_nsc_button.setMinimumHeight(40)
+        self.load_nsc_button.clicked.connect(self._select_nsc_file)
+        self.load_nsc_button.setStyleSheet(
+            _PRIMARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
+        )
+        left_layout.addWidget(self.load_nsc_button)
+
         self.ecg_button = QPushButton("View Raw Data")
         self.ecg_button.setMinimumHeight(36)
         self.ecg_button.setEnabled(False)
@@ -338,6 +346,15 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         )
         if folder:
             self._ctrl.load_dataset(Path(folder))
+
+    def _select_nsc_file(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Finapres NOVA .nsc File",
+            str(self._settings.data_folder),
+            "NSC files (*.nsc);;All files (*)",
+        )
+        if path:
+            self._ctrl.load_nsc_file(Path(path))
 
     def _on_phase_changed(self) -> None:
         self.update_markers_table()

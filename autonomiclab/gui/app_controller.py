@@ -111,6 +111,35 @@ class AppController:
             f"  |  {len(self._state.dataset.markers)} markers"
         )
 
+    def load_nsc_file(self, nsc_path: Path) -> None:
+        """Load a single .nsc binary file (no markers required)."""
+        try:
+            self._state.dataset = self._svc.load_nsc(nsc_path)
+        except Exception as exc:
+            log.error("Failed to load NSC file: %s", exc)
+            self._w.set_status("error", f"Load failed: {exc}")
+            return
+
+        if not self._state.dataset.signals:
+            self._w.set_status("error", "No signals could be read from the file")
+            return
+
+        self._state.overrides = override_store.load(self._state.dataset.path)
+
+        self._w.set_status("ok", f"Loaded: {nsc_path.name}")
+        self._w.populate_phase_combo()
+        self._w.update_dataset_info()
+        self._w.update_markers_table()
+        self.plot_current_phase()
+
+        has_ecg = any(self._state.dataset.has_signal(k) for k in _ECG_SIGNALS)
+        self._w.set_ecg_enabled(has_ecg)
+        self._w.set_plot_stack_index(1)
+        self._w.show_message(
+            f"✓  {nsc_path.name}"
+            f"  |  {len(self._state.dataset.signals)} signals"
+        )
+
     # ── phase plotting ────────────────────────────────────────────────────────
 
     def plot_current_phase(self) -> None:
@@ -128,6 +157,7 @@ class AppController:
         st.last_result       = None
         self._w.set_export_enabled(False)
 
+        self._plot.setUpdatesEnabled(False)
         try:
             if phase == "All":
                 self._overview.plot(self._plot, st.dataset)
@@ -201,6 +231,8 @@ class AppController:
             log.exception("Plot error: %s", exc)
             self._w.set_status("error", f"Plot error: {exc}")
             self._w.show_message(f"Plot error: {exc}")
+        finally:
+            self._plot.setUpdatesEnabled(True)
 
     # ── override callbacks ────────────────────────────────────────────────────
 
