@@ -76,7 +76,7 @@ jobs:
         run: choco install wkhtmltopdf --yes
 
       - name: Generate PDF user guide
-        run: pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+        run: pandoc docs/user_guide.md -o "dist/UserGuide-${{ github.ref_name }}.pdf" --pdf-engine=wkhtmltopdf --css docs/user_guide.css
         continue-on-error: true
 
       - name: Create installer config template
@@ -102,7 +102,7 @@ jobs:
         with:
           files: |
             dist/AutonomicLab_Setup.exe
-            dist/UserGuide.pdf
+            dist/UserGuide-${{ github.ref_name }}.pdf
 
       - name: Upload to OneDrive
         run: |
