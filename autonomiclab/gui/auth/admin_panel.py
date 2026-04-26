@@ -48,13 +48,13 @@ _INPUT = """
 class AdminPanel(QDialog):
     """Simple CRUD interface for managing AutonomicLab user accounts."""
 
-    _COLS = ["Brugernavn", "Visningsnavn", "Rolle", "Aktiv"]
+    _COLS = ["Username", "Display Name", "Role", "Active"]
 
     def __init__(self, store: UserStore, parent=None, db_token: str = "") -> None:
         super().__init__(parent)
         self._store    = store
         self._db_token = db_token
-        self.setWindowTitle("Brugeradministration")
+        self.setWindowTitle("User Administration")
         self.resize(700, 480)
 
         root = QVBoxLayout()
@@ -63,7 +63,7 @@ class AdminPanel(QDialog):
         self.setLayout(root)
 
         # Title
-        title = QLabel("Brugeradministration")
+        title = QLabel("User Administration")
         title.setStyleSheet("font-size: 16px; font-weight: 700;")
         root.addWidget(title)
 
@@ -81,11 +81,11 @@ class AdminPanel(QDialog):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
 
-        self._add_btn    = QPushButton("Tilføj bruger")
-        self._edit_btn   = QPushButton("Rediger")
-        self._passwd_btn = QPushButton("Skift kode")
-        self._toggle_btn = QPushButton("Aktiver / Deaktiver")
-        self._del_btn    = QPushButton("Slet")
+        self._add_btn    = QPushButton("Add User")
+        self._edit_btn   = QPushButton("Edit")
+        self._passwd_btn = QPushButton("Change Password")
+        self._toggle_btn = QPushButton("Enable / Disable")
+        self._del_btn    = QPushButton("Delete")
 
         self._add_btn.setStyleSheet(_PRIMARY)
         self._edit_btn.setStyleSheet(_SECONDARY)
@@ -104,7 +104,7 @@ class AdminPanel(QDialog):
             btn_row.addWidget(btn)
         btn_row.addStretch()
 
-        close_btn = QPushButton("Luk")
+        close_btn = QPushButton("Close")
         close_btn.setStyleSheet(_SECONDARY)
         close_btn.clicked.connect(self.accept)
         btn_row.addWidget(close_btn)
@@ -121,9 +121,9 @@ class AdminPanel(QDialog):
             if not push_users_db(self._db_token, db_path):
                 from PyQt6.QtWidgets import QMessageBox
                 QMessageBox.warning(
-                    self, "Sync fejlede",
-                    "Kunne ikke synkronisere brugerlisten til GitHub.\n"
-                    "Ændringerne er gemt lokalt.",
+                    self, "Sync failed",
+                    "Could not sync the user list to GitHub.\n"
+                    "Changes are saved locally.",
                 )
         super().done(result)
 
@@ -136,7 +136,7 @@ class AdminPanel(QDialog):
             self._table.setItem(row, 0, QTableWidgetItem(user.username))
             self._table.setItem(row, 1, QTableWidgetItem(user.display_name))
             self._table.setItem(row, 2, QTableWidgetItem(user.role.value))
-            active_txt = "Ja" if user.is_active else "Nej"
+            active_txt = "Yes" if user.is_active else "No"
             item = QTableWidgetItem(active_txt)
             item.setForeground(Qt.GlobalColor.darkGreen if user.is_active else Qt.GlobalColor.red)
             self._table.setItem(row, 3, item)
@@ -189,8 +189,8 @@ class AdminPanel(QDialog):
         if not username:
             return
         answer = QMessageBox.question(
-            self, "Slet bruger",
-            f"Er du sikker på, at du vil slette <b>{username}</b>?",
+            self, "Delete User",
+            f"Are you sure you want to delete <b>{username}</b>?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if answer == QMessageBox.StandardButton.Yes:
@@ -208,7 +208,7 @@ class _UserFormDialog(QDialog):
         super().__init__(parent)
         self._store    = store
         self._existing = existing
-        self.setWindowTitle("Rediger bruger" if existing else "Tilføj bruger")
+        self.setWindowTitle("Edit User" if existing else "Add User")
         self.setFixedWidth(340)
 
         root = QVBoxLayout()
@@ -223,11 +223,11 @@ class _UserFormDialog(QDialog):
         self._uname = QLineEdit(existing.username if existing else "")
         self._uname.setStyleSheet(_INPUT)
         self._uname.setEnabled(existing is None)   # username is immutable
-        row("Brugernavn", self._uname)
+        row("Username", self._uname)
 
         self._display = QLineEdit(existing.display_name if existing else "")
         self._display.setStyleSheet(_INPUT)
-        row("Visningsnavn", self._display)
+        row("Display Name", self._display)
 
         self._role_cb = QComboBox()
         for r in Role:
@@ -236,18 +236,18 @@ class _UserFormDialog(QDialog):
             idx = self._role_cb.findData(existing.role)
             if idx >= 0:
                 self._role_cb.setCurrentIndex(idx)
-        row("Rolle", self._role_cb)
+        row("Role", self._role_cb)
 
         if existing is None:
             self._pw1 = QLineEdit()
             self._pw1.setEchoMode(QLineEdit.EchoMode.Password)
             self._pw1.setStyleSheet(_INPUT)
-            row("Adgangskode", self._pw1)
+            row("Password", self._pw1)
 
             self._pw2 = QLineEdit()
             self._pw2.setEchoMode(QLineEdit.EchoMode.Password)
             self._pw2.setStyleSheet(_INPUT)
-            row("Gentag adgangskode", self._pw2)
+            row("Repeat Password", self._pw2)
         else:
             self._pw1 = self._pw2 = None  # type: ignore[assignment]
 
@@ -256,10 +256,10 @@ class _UserFormDialog(QDialog):
         root.addWidget(self._error)
 
         btns = QHBoxLayout()
-        ok = QPushButton("Gem")
+        ok = QPushButton("Save")
         ok.setStyleSheet(_PRIMARY)
         ok.clicked.connect(self._save)
-        cancel = QPushButton("Annuller")
+        cancel = QPushButton("Cancel")
         cancel.setStyleSheet(_SECONDARY)
         cancel.clicked.connect(self.reject)
         btns.addWidget(ok)
@@ -272,20 +272,20 @@ class _UserFormDialog(QDialog):
         role     = self._role_cb.currentData()
 
         if not username or not display:
-            self._error.setText("Udfyld alle felter.")
+            self._error.setText("Fill in all fields.")
             return
 
         if self._existing is None:
             pw1 = self._pw1.text()
             pw2 = self._pw2.text()
             if not pw1:
-                self._error.setText("Angiv en adgangskode.")
+                self._error.setText("Enter a password.")
                 return
             if pw1 != pw2:
-                self._error.setText("Adgangskoderne stemmer ikke overens.")
+                self._error.setText("Passwords do not match.")
                 return
             if self._store.get_user(username):
-                self._error.setText("Brugernavnet er allerede i brug.")
+                self._error.setText("Username is already in use.")
                 return
             user = User(
                 username=username,
@@ -308,7 +308,7 @@ class _PasswordDialog(QDialog):
         super().__init__(parent)
         self._username = username
         self._store    = store
-        self.setWindowTitle(f"Skift kode — {username}")
+        self.setWindowTitle(f"Change Password — {username}")
         self.setFixedWidth(300)
 
         root = QVBoxLayout()
@@ -316,13 +316,13 @@ class _PasswordDialog(QDialog):
         root.setSpacing(8)
         self.setLayout(root)
 
-        root.addWidget(QLabel("Ny adgangskode"))
+        root.addWidget(QLabel("New Password"))
         self._pw1 = QLineEdit()
         self._pw1.setEchoMode(QLineEdit.EchoMode.Password)
         self._pw1.setStyleSheet(_INPUT)
         root.addWidget(self._pw1)
 
-        root.addWidget(QLabel("Gentag adgangskode"))
+        root.addWidget(QLabel("Repeat Password"))
         self._pw2 = QLineEdit()
         self._pw2.setEchoMode(QLineEdit.EchoMode.Password)
         self._pw2.setStyleSheet(_INPUT)
@@ -333,10 +333,10 @@ class _PasswordDialog(QDialog):
         root.addWidget(self._error)
 
         btns = QHBoxLayout()
-        ok = QPushButton("Gem")
+        ok = QPushButton("Save")
         ok.setStyleSheet(_PRIMARY)
         ok.clicked.connect(self._save)
-        cancel = QPushButton("Annuller")
+        cancel = QPushButton("Cancel")
         cancel.setStyleSheet(_SECONDARY)
         cancel.clicked.connect(self.reject)
         btns.addWidget(ok)
@@ -347,12 +347,12 @@ class _PasswordDialog(QDialog):
         pw1 = self._pw1.text()
         pw2 = self._pw2.text()
         if not pw1:
-            self._error.setText("Angiv en adgangskode.")
+            self._error.setText("Enter a password.")
             return
         if pw1 != pw2:
-            self._error.setText("Adgangskoderne stemmer ikke overens.")
+            self._error.setText("Passwords do not match.")
             return
         self._store.set_password(self._username, pw1)
         log.info("Password changed for user: %s", self._username)
-        QMessageBox.information(self, "Gemt", "Adgangskoden er ændret.")
+        QMessageBox.information(self, "Saved", "Password has been changed.")
         self.accept()

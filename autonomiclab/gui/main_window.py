@@ -296,7 +296,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
         if auth_session.is_admin():
             admin_menu = menu_bar.addMenu("Admin")
-            manage_action = admin_menu.addAction("Administrer brugere…")
+            manage_action = admin_menu.addAction("Manage Users…")
             manage_action.triggered.connect(self._show_admin_panel)
 
     def _show_admin_panel(self) -> None:

@@ -12,14 +12,18 @@ Click **More info**, then **Run anyway** to proceed.
 
 A splash screen appears while the program loads, followed by the login dialog.
 
+![Splash screen](../figs/splash.png)
+
 ---
 
 ## Logging in
 
 When the program starts, a login dialog is shown.
 
-- Enter your **username** and **password** and click **Log in**.
-- If you do not have an account, click **Fortsæt som gæst** to launch as a guest.
+![Sign In dialog](../figs/login.png)
+
+- Enter your **Username** and **Password** and click **Sign In**.
+- If you do not have an account, click **Continue as guest** to launch as a guest.
   Guest access is limited to a fixed number of launches per machine.
   Contact your administrator to create a personal account.
 
@@ -60,6 +64,8 @@ detecting the datetime prefix and loading all signals automatically.
 Tests sympathetic and parasympathetic response to forced expiration against resistance.
 - Shows: Blood Pressure (reBAP), Heart Rate (HR), Airway Pressure (PAirway)
 - Phases: I, II (early/late), III, IV
+
+![Valsalva method](../figs/valsalva_method.svg)
 
 ### Stand Test
 Tests orthostatic blood pressure regulation upon standing.
@@ -144,24 +150,24 @@ AutonomicLab has three access levels:
 
 ### Admin Panel
 
-Administrators manage accounts via **Settings → Admin Panel**.
+Administrators manage accounts via **Admin → Manage Users…**.
 
 | Action | How |
 |---|---|
-| Add user | Click **Tilføj bruger**, fill in username, display name, role, and password |
-| Edit display name or role | Select a row, click **Rediger** |
-| Change password | Select a row, click **Skift kode** |
-| Enable / disable | Select a row, click **Aktiver / Deaktiver** |
-| Delete | Select a row, click **Slet** |
+| Add user | Click **Add User**, fill in username, display name, role, and password |
+| Edit display name or role | Select a row, click **Edit** |
+| Change password | Select a row, click **Change Password** |
+| Enable / disable | Select a row, click **Enable / Disable** |
+| Delete | Select a row, click **Delete** |
 
-Click **Luk** to close the panel. Changes are saved locally and automatically
+Click **Close** to close the panel. Changes are saved locally and automatically
 pushed to the shared user database on GitHub — all other installations will
 receive the updated list the next time they start.
 
 ### First run
 
 If no user accounts exist yet, the login dialog is skipped. Open
-**Settings → Admin Panel**, add at least one admin account, and click **Luk**.
+**Admin → Manage Users…**, add at least one admin account, and click **Close**.
 The account is immediately synced to GitHub and active on all machines.
 
 ### Disabling guest access

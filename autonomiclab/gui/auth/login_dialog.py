@@ -74,7 +74,7 @@ class LoginDialog(QDialog):
         self._guest = guest_counter
         self._allow_guest = allow_guest
 
-        self.setWindowTitle("AutonomicLab — Log ind")
+        self.setWindowTitle("AutonomicLab — Sign In")
         self.setFixedWidth(360)
         self.setWindowFlags(
             Qt.WindowType.Dialog | Qt.WindowType.WindowTitleHint |
@@ -87,22 +87,22 @@ class LoginDialog(QDialog):
         self.setLayout(root)
 
         # Title
-        title = QLabel("Log ind")
+        title = QLabel("Sign In")
         title.setStyleSheet("font-size: 20px; font-weight: 700; color: #111;")
         root.addWidget(title)
         root.addSpacing(20)
 
         # Username
-        root.addWidget(self._label("Brugernavn"))
+        root.addWidget(self._label("Username"))
         root.addSpacing(4)
         self._username = QLineEdit()
-        self._username.setPlaceholderText("dit.navn")
+        self._username.setPlaceholderText("your.name")
         self._username.setStyleSheet(_INPUT_STYLE)
         root.addWidget(self._username)
         root.addSpacing(12)
 
         # Password
-        root.addWidget(self._label("Adgangskode"))
+        root.addWidget(self._label("Password"))
         root.addSpacing(4)
         self._password = QLineEdit()
         self._password.setEchoMode(QLineEdit.EchoMode.Password)
@@ -118,7 +118,7 @@ class LoginDialog(QDialog):
         root.addSpacing(16)
 
         # Login button
-        self._login_btn = QPushButton("Log ind")
+        self._login_btn = QPushButton("Sign In")
         self._login_btn.setStyleSheet(_BTN_PRIMARY)
         self._login_btn.clicked.connect(self._try_login)
         root.addWidget(self._login_btn)
@@ -126,7 +126,7 @@ class LoginDialog(QDialog):
         remaining = self._guest.remaining()
         if self._allow_guest and remaining > 0:
             root.addSpacing(8)
-            self._guest_btn = QPushButton(f"Fortsæt som gæst  ({remaining} lanceringer tilbage)")
+            self._guest_btn = QPushButton(f"Continue as guest  ({remaining} launches left)")
             self._guest_btn.setStyleSheet(_BTN_SECONDARY)
             self._guest_btn.clicked.connect(self._try_guest)
             root.addWidget(self._guest_btn)
@@ -145,12 +145,12 @@ class LoginDialog(QDialog):
         self._error_lbl.setText("")
 
         if not username or not password:
-            self._error_lbl.setText("Udfyld brugernavn og adgangskode.")
+            self._error_lbl.setText("Enter username and password.")
             return
 
         user = self._store.authenticate(username, password)
         if user is None:
-            self._error_lbl.setText("Forkert brugernavn eller adgangskode.")
+            self._error_lbl.setText("Incorrect username or password.")
             self._password.clear()
             self._password.setFocus()
             log.warning("Failed login attempt for user: %s", username)
@@ -163,15 +163,15 @@ class LoginDialog(QDialog):
     def _try_guest(self) -> None:
         if not self._guest.consume():
             QMessageBox.warning(
-                self, "Gæsteadgang udløbet",
-                "Der er ikke flere gæstelanceringer tilbage på denne maskine.\n"
-                "Kontakt administratoren for at oprette en brugerkonto.",
+                self, "Guest access expired",
+                "No more guest launches remaining on this machine.\n"
+                "Contact the administrator to create a user account.",
             )
             return
 
         guest_user = User(
             username="guest",
-            display_name="Gæst",
+            display_name="Guest",
             password_hash="",
             role=Role.GUEST,
         )
