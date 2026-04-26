@@ -172,8 +172,9 @@ Click **Close** to close the panel.
 
 The list of users (`users.db`) is stored in a private GitHub repository
 (`John-H-Aal/autonomiclab-users`) and shared between all installations
-of AutonomicLab. The `config.yaml` next to `AutonomicLab.exe` contains a
-GitHub access token that lets the program read and write this file.
+of AutonomicLab. The `config.yaml` next to `AutonomicLab.exe` contains
+read-only GitHub access token (`users_db_token`) that lets the program
+fetch this file on launch.
 
 **On every program launch (if the machine is online):**
 
@@ -190,7 +191,7 @@ the user has signed in on that machine before.
 1. Local changes (added users, password resets, role changes, deletions)
    are saved to the local `users.db`.
 2. The local `users.db` is uploaded back to GitHub, replacing the remote
-   copy.
+   copy (requires the admin token — see setup note below).
 3. The next time any other user launches the program, step 1 above pulls
    the new version automatically.
 
@@ -201,6 +202,20 @@ their next launch — no manual file copying required.
 If the upload fails (no internet, expired token, etc.) the changes remain
 on the admin's local machine and a warning is shown. The next successful
 admin-panel close will push them.
+
+**Admin machine setup (one-time):**
+
+To enable syncing from the Admin Panel, add the following line to
+`config.yaml` next to `AutonomicLab.exe` on the admin's machine:
+
+```yaml
+users_db_admin_token: "ghp_your_write_token_here"
+```
+
+Contact the system administrator (John Hansen) to obtain the write token.
+This token is not included in the standard installer — it is only added
+manually on machines used for admin tasks. Other users' installations are
+unaffected.
 
 ### First run
 
