@@ -6,6 +6,12 @@ Analyses Finapres NOVA recordings of Valsalva maneuver, Stand Test, and Deep Bre
 
 ---
 
+## For users
+
+End-user documentation: see [docs/user_guide.md](docs/user_guide.md).
+
+---
+
 ## For Windows users
 
 Download the latest installer from the [Releases page](https://github.com/John-H-Aal/autonomiclab/releases/latest) and follow [INSTALLATION.md](INSTALLATION.md).
@@ -34,6 +40,8 @@ pip install -r requirements.txt
 ```bash
 python -m autonomiclab
 ```
+
+Login is skipped on first run when `users.db` is empty — see [docs/user_guide.md](docs/user_guide.md) for the admin seeding flow.
 
 ### Configuration
 
