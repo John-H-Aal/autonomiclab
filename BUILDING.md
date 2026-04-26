@@ -26,10 +26,9 @@ GitHub builds the `.exe` automatically — no Windows machine needed.
 
 4. When complete, the release is published at:
    `https://github.com/John-H-Aal/autonomiclab/releases`
-   with three downloadable files:
-   - `AutonomicLab.exe`
-   - `config.yaml`
-   - `autonomiclab_splash.png`
+   with two downloadable files:
+   - `AutonomicLab_Setup_<version>.exe` — Inno Setup installer (bundles the EXE, splash, config template, and PDF user guide).
+   - `UserGuide-<version>.pdf` — standalone copy of the user guide.
 
 ---
 
