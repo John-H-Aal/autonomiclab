@@ -126,11 +126,24 @@ class AdminPanel(QDialog):
                     "Changes are saved locally.",
                 )
         else:
-            QMessageBox.warning(
-                self, "Sync not configured",
-                "Changes saved locally.\n"
-                "Add users_db_admin_token to config.yaml to enable GitHub sync."
-            )
+            dlg = _AdminTokenDialog(self)
+            if dlg.exec() == QDialog.DialogCode.Accepted:
+                from autonomiclab.config.app_settings import AppSettings
+                settings = AppSettings()
+                if settings.set_admin_token(dlg.token):
+                    self._db_token = dlg.token
+                    from autonomiclab.auth.sync import push_users_db
+                    if not push_users_db(self._db_token, settings.users_db_path):
+                        QMessageBox.warning(
+                            self, "Sync failed",
+                            "Token saved. Could not sync to GitHub right now.\n"
+                            "Changes are saved locally.",
+                        )
+                else:
+                    QMessageBox.warning(
+                        self, "Could not save token",
+                        "Failed to write to config.yaml.\nChanges are saved locally.",
+                    )
         super().done(result)
 
     # ── table helpers ────────────────────────────────────────────────────────
@@ -362,3 +375,68 @@ class _PasswordDialog(QDialog):
         log.info("Password changed for user: %s", self._username)
         QMessageBox.information(self, "Saved", "Password has been changed.")
         self.accept()
+
+
+class _AdminTokenDialog(QDialog):
+    """One-time dialog to configure the admin GitHub sync token."""
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Configure admin sync")
+        self.setFixedWidth(440)
+
+        root = QVBoxLayout()
+        root.setContentsMargins(20, 16, 20, 16)
+        root.setSpacing(8)
+        self.setLayout(root)
+
+        root.addWidget(QLabel(
+            "Enter your admin GitHub token to sync user changes to GitHub.\n"
+            "The token will be saved to config.yaml on this machine."
+        ))
+
+        token_row = QHBoxLayout()
+        self._token = QLineEdit()
+        self._token.setEchoMode(QLineEdit.EchoMode.Password)
+        self._token.setStyleSheet(_INPUT)
+        self._token.setPlaceholderText("github_pat_...")
+        token_row.addWidget(self._token)
+
+        show_btn = QPushButton("👁")
+        show_btn.setFixedWidth(32)
+        show_btn.setCheckable(True)
+        show_btn.setStyleSheet(_SECONDARY)
+        show_btn.toggled.connect(lambda on: self._token.setEchoMode(
+            QLineEdit.EchoMode.Normal if on else QLineEdit.EchoMode.Password
+        ))
+        token_row.addWidget(show_btn)
+        root.addLayout(token_row)
+
+        self._error = QLabel("")
+        self._error.setStyleSheet("color: #c00; font-size: 11px;")
+        root.addWidget(self._error)
+
+        btns = QHBoxLayout()
+        ok = QPushButton("Configure")
+        ok.setStyleSheet(_PRIMARY)
+        ok.clicked.connect(self._save)
+        skip = QPushButton("Skip")
+        skip.setStyleSheet(_SECONDARY)
+        skip.clicked.connect(self.reject)
+        btns.addWidget(ok)
+        btns.addWidget(skip)
+        root.addLayout(btns)
+
+    def _save(self) -> None:
+        token = self._token.text().strip()
+        if not token:
+            self._error.setText("Enter a token.")
+            return
+        if not token.startswith("github_"):
+            self._error.setText("Token should start with 'github_'.")
+            return
+        self.accept()
+
+    @property
+    def token(self) -> str:
+        return self._token.text().strip()

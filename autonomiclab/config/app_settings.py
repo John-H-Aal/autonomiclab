@@ -7,6 +7,7 @@ Two-layer configuration:
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -93,6 +94,26 @@ class AppSettings:
     def users_db_admin_token(self) -> str:
         """GitHub Personal Access Token for admin push. Empty = no push."""
         return self._config.get("users_db_admin_token") or ""
+
+    def set_admin_token(self, token: str) -> bool:
+        """Persist users_db_admin_token to config.yaml. Returns True on success."""
+        config_file = _app_dir() / "config.yaml"
+        try:
+            text = config_file.read_text(encoding="utf-8") if config_file.exists() else ""
+            line = f'users_db_admin_token: "{token}"'
+            if re.search(r"^users_db_admin_token:", text, re.MULTILINE):
+                text = re.sub(r"^users_db_admin_token:.*$", line, text, flags=re.MULTILINE)
+            elif re.search(r"^users_db_token:", text, re.MULTILINE):
+                text = re.sub(r"(^users_db_token:.*$)", r"\1\n" + line, text, flags=re.MULTILINE)
+            else:
+                text = text.rstrip("\n") + f"\n{line}\n"
+            config_file.write_text(text, encoding="utf-8")
+            self._config["users_db_admin_token"] = token
+            log.info("Admin token saved to %s", config_file)
+            return True
+        except Exception as exc:
+            log.warning("Could not save admin token: %s", exc)
+            return False
 
     @property
     def allow_guest(self) -> bool:
