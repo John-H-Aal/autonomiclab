@@ -282,13 +282,23 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         self._init_menu_bar()
 
     def _init_menu_bar(self) -> None:
-        if not auth_session.is_admin():
-            return
-        menu_bar = self.menuBar()
-        admin_menu = menu_bar.addMenu("Admin")
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtGui import QDesktopServices
 
-        manage_action = admin_menu.addAction("Administrer brugere…")
-        manage_action.triggered.connect(self._show_admin_panel)
+        menu_bar = self.menuBar()
+
+        help_menu = menu_bar.addMenu("Help")
+        guide_action = help_menu.addAction("User Guide")
+        guide_action.triggered.connect(
+            lambda: QDesktopServices.openUrl(
+                QUrl("https://github.com/John-H-Aal/autonomiclab/releases/latest")
+            )
+        )
+
+        if auth_session.is_admin():
+            admin_menu = menu_bar.addMenu("Admin")
+            manage_action = admin_menu.addAction("Administrer brugere…")
+            manage_action.triggered.connect(self._show_admin_panel)
 
     def _show_admin_panel(self) -> None:
         from autonomiclab.auth.user_store import UserStore
