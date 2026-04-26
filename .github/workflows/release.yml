@@ -74,7 +74,10 @@ jobs:
 
       - name: Generate PDF user guide
         run: |
-          pandoc docs/user_guide.md -o "dist/UserGuide.pdf" --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Push-Location docs
+          pandoc user_guide.md -o "../dist/UserGuide.pdf" --pdf-engine=wkhtmltopdf --css user_guide.css
+          Pop-Location
           Copy-Item "dist/UserGuide.pdf" "dist/UserGuide-${{ github.ref_name }}.pdf"
         continue-on-error: true
 

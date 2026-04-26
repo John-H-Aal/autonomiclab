@@ -54,7 +54,7 @@ def render_login(out: Path) -> None:
 
 def main() -> None:
     app = QApplication(sys.argv)
-    figs = ROOT / "figs"
+    figs = ROOT / "docs" / "figs"
     figs.mkdir(exist_ok=True)
     render_splash(figs / "splash.png")
     render_login(figs / "login.png")

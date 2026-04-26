@@ -12,7 +12,7 @@ Click **More info**, then **Run anyway** to proceed.
 
 A splash screen appears while the program loads, followed by the login dialog.
 
-![Splash screen](../figs/splash.png)
+![Splash screen](figs/splash.png)
 
 ---
 
@@ -20,7 +20,7 @@ A splash screen appears while the program loads, followed by the login dialog.
 
 When the program starts, a login dialog is shown.
 
-![Sign In dialog](../figs/login.png)
+![Sign In dialog](figs/login.png)
 
 - Enter your **Username** and **Password** and click **Sign In**.
 - If you do not have an account, click **Continue as guest** to launch as a guest.
@@ -65,7 +65,7 @@ Tests sympathetic and parasympathetic response to forced expiration against resi
 - Shows: Blood Pressure (reBAP), Heart Rate (HR), Airway Pressure (PAirway)
 - Phases: I, II (early/late), III, IV
 
-![Valsalva method](../figs/valsalva_method.svg)
+![Valsalva method](figs/valsalva_method.svg)
 
 ### Stand Test
 Tests orthostatic blood pressure regulation upon standing.
