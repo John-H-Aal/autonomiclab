@@ -36,10 +36,12 @@ Click **Open Dataset** in the left panel. A small dialog asks what you want to o
 
 1. Click **CSV Folder**.
 2. Navigate to the folder containing your Finapres data files.
-3. Click **Select Folder** (the standard Windows folder picker).
+3. Select the `*Markers.csv` file (the file picker shows you all CSV files
+   so you can confirm you're in the right folder).
+4. Click **Open**.
 
-The folder must contain a `*Markers.csv` file and the associated signal CSVs.
-The program automatically detects the datetime prefix and loads all signals.
+The program loads the entire folder containing the markers file —
+detecting the datetime prefix and loading all signals automatically.
 
 ### Finapres NOVA recording (.nsc file)
 

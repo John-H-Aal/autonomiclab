@@ -357,10 +357,13 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         start_dir = str(self._settings.data_folder)
 
         if clicked is csv_btn:
-            folder = QFileDialog.getExistingDirectory(self, "Select CSV folder", start_dir)
-            if not folder:
+            path, _ = QFileDialog.getOpenFileName(
+                self, "Select the Markers.csv file from your dataset folder",
+                start_dir, "Markers files (*Markers.csv);;CSV files (*.csv)"
+            )
+            if not path:
                 return
-            self._ctrl.load_dataset(Path(folder))
+            self._ctrl.load_dataset(Path(path).parent)
         elif clicked is nsc_btn:
             path, _ = QFileDialog.getOpenFileName(
                 self, "Select .nsc file", start_dir, "Finapres NOVA (*.nsc)"
