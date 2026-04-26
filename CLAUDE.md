@@ -16,7 +16,7 @@ Log: `autonomiclab.log` in project root.
 | `analysis/` | Signal-processing algorithms per protocol (valsalva, deep_breathing, stand) |
 | `plotting/` | pyqtgraph plot classes per protocol; `registry.py` maps protocol → plot |
 | `gui/` | `main_window`, `app_controller`, `app_state`, `raw_data_window`, widgets |
-| `auth/` | `user_store` (encrypted SQLite), `session`, `guest_counter`, `sync` (Dropbox), `crypto` |
+| `auth/` | `user_store` (encrypted SQLite), `session`, `guest_counter`, `sync` (GitHub Contents API), `crypto` |
 | `export/` | Excel (openpyxl) and image (Pillow/WeasyPrint) export |
 | `config/` | `AppSettings` (config.yaml wrapper), font loader |
 
@@ -26,8 +26,9 @@ Log: `autonomiclab.log` in project root.
 
 ## Auth system
 - Three roles: admin, investigator, guest (10-launch MAC-bound counter).
-- `users.db` = encrypted SQLite. `config.yaml` → `users_db_url` → Dropbox sync on startup.
-- **First-run bypass**: if `users.db` is empty, login is skipped. Run `scripts/create_admin.py` to seed.
+- `users.db` = encrypted SQLite (Fernet-encrypted records, bcrypt password hashes). On launch, `autonomiclab/auth/sync.py:sync_users_db()` GETs `users.db` from the private GitHub repo `John-H-Aal/autonomiclab-users` via the Contents API and replaces the local copy if it differs. The PAT used for the call lives in `config.yaml` under `users_db_token` (currently a single combined-scope PAT shipped in every installer; embedded by `installer.iss` from CI secret `USERS_DB_TOKEN`). Offline-tolerant: silent skip on failure.
+- Admin Panel close calls `push_users_db()` (PUT with current SHA) using the same token, so admin edits propagate to all installations.
+- **First-run bypass**: if `users.db` has no users, the login dialog is skipped. Seed the first admin via `scripts/create_admin.py`.
 - Admin menu in `MainWindow` visible only when `auth_session.is_admin()`.
 
 ## Known sharp corners
@@ -40,7 +41,7 @@ Push a version tag → GitHub Actions builds the Windows `.exe` (~3–5 min):
 ```bash
 git tag v1.x.x && git push origin v1.x.x
 ```
-Release artifacts: `AutonomicLab.exe`, `config.yaml`, `autonomiclab_splash.png`. See `BUILDING.md`.
+Release artifacts: `AutonomicLab_Setup_<version>.exe`, `UserGuide-<version>.pdf`. See `BUILDING.md`. (Config and splash are bundled into the installer, not standalone release files.)
 
 ## Style
 - Responses must be as short as possible. No filler, no preamble, no "here's what I did" recaps.
