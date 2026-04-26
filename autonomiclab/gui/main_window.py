@@ -125,21 +125,13 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         left_layout.addWidget(self._make_section_header("Actions"))
 
         btn_font = FontLoader.get("left_panel", "button")
-        self.select_button = QPushButton("Select Dataset")
-        self.select_button.clicked.connect(self._select_folder)
+        self.select_button = QPushButton("Open Dataset")
+        self.select_button.clicked.connect(self._open_dataset)
         self.select_button.setMinimumHeight(40)
         self.select_button.setStyleSheet(
             _PRIMARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
         )
         left_layout.addWidget(self.select_button)
-
-        self.load_nsc_button = QPushButton("Load .nsc File")
-        self.load_nsc_button.setMinimumHeight(40)
-        self.load_nsc_button.clicked.connect(self._select_nsc_file)
-        self.load_nsc_button.setStyleSheet(
-            _PRIMARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
-        )
-        left_layout.addWidget(self.load_nsc_button)
 
         self.ecg_button = QPushButton("View Raw Data")
         self.ecg_button.setMinimumHeight(36)
@@ -338,23 +330,54 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
     # ── thin delegators to controller ─────────────────────────────────────────
 
-    def _select_folder(self) -> None:
-        folder = QFileDialog.getExistingDirectory(
-            self, "Select Finapres Dataset",
-            str(self._settings.data_folder),
-            QFileDialog.Option.ShowDirsOnly,
-        )
-        if folder:
-            self._ctrl.load_dataset(Path(folder))
+    def _open_dataset(self) -> None:
+        from PyQt6.QtWidgets import QDialogButtonBox
 
-    def _select_nsc_file(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Finapres NOVA .nsc File",
-            str(self._settings.data_folder),
-            "NSC files (*.nsc);;All files (*)",
-        )
-        if path:
-            self._ctrl.load_nsc_file(Path(path))
+        dialog = QFileDialog(self, "Open Dataset", str(self._settings.data_folder))
+        dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setNameFilters(["All files (*)", "Finapres files (*.nsc)"])
+
+        # Extra button: accept the current directory as a CSV dataset folder.
+        # Must call QDialog.accept() directly to bypass QFileDialog's file-validation guard.
+        from PyQt6.QtWidgets import QDialog as _QDialog
+        btn_box = dialog.findChild(QDialogButtonBox)
+        folder_btn = btn_box.addButton("Select This Folder", QDialogButtonBox.ButtonRole.ActionRole)
+        selected_folder: list[Path | None] = [None]
+
+        def _has_csv(directory: str) -> bool:
+            return any(Path(directory).glob("*.csv"))
+
+        def _update_folder_btn(directory: str) -> None:
+            folder_btn.setEnabled(_has_csv(directory))
+
+        dialog.directoryEntered.connect(_update_folder_btn)
+        _update_folder_btn(str(self._settings.data_folder))
+
+        def _use_current_dir() -> None:
+            selected_folder[0] = Path(dialog.directory().absolutePath())
+            _QDialog.accept(dialog)
+
+        folder_btn.clicked.connect(_use_current_dir)
+
+        if not dialog.exec():
+            return
+
+        if selected_folder[0] is not None:
+            self._ctrl.load_dataset(selected_folder[0])
+            return
+
+        selected = dialog.selectedFiles()
+        if not selected:
+            return
+        path = Path(selected[0])
+        if path.suffix.lower() == ".nsc":
+            self._ctrl.load_nsc_file(path)
+        else:
+            QMessageBox.warning(
+                self, "Unknown format",
+                f"Cannot load '{path.name}'.\n\nSelect a .nsc file, or navigate into a CSV folder and click 'Select This Folder'.",
+            )
 
     def _on_phase_changed(self) -> None:
         self.update_markers_table()
