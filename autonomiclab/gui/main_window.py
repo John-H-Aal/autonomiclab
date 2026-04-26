@@ -340,56 +340,34 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
     # ── thin delegators to controller ─────────────────────────────────────────
 
     def _open_dataset(self) -> None:
-        from PyQt6.QtWidgets import QDialogButtonBox
+        """Ask user what to open, then use a NATIVE Windows dialog.
 
-        dialog = QFileDialog(self, "Open Dataset", str(self._settings.data_folder))
-        dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
-        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        dialog.setNameFilters(["All files (*)", "Finapres files (*.nsc)"])
+        Native dialogs avoid Qt's QGraphicsScene-based fallback which on
+        Windows leaves residual state that crashes pyqtgraph painting.
+        """
+        choice = QMessageBox(self)
+        choice.setWindowTitle("Open Dataset")
+        choice.setText("What do you want to open?")
+        csv_btn = choice.addButton("CSV Folder", QMessageBox.ButtonRole.AcceptRole)
+        nsc_btn = choice.addButton(".nsc File",  QMessageBox.ButtonRole.AcceptRole)
+        choice.addButton(QMessageBox.StandardButton.Cancel)
+        choice.exec()
+        clicked = choice.clickedButton()
 
-        # Extra button: accept the current directory as a CSV dataset folder.
-        # Must call QDialog.accept() directly to bypass QFileDialog's file-validation guard.
-        from PyQt6.QtWidgets import QDialog as _QDialog
-        btn_box = dialog.findChild(QDialogButtonBox)
-        folder_btn = btn_box.addButton("Select This Folder", QDialogButtonBox.ButtonRole.ActionRole)
-        selected_folder: list[Path | None] = [None]
+        start_dir = str(self._settings.data_folder)
 
-        def _has_csv(directory: str) -> bool:
-            return any(Path(directory).glob("*.csv"))
-
-        def _update_folder_btn(directory: str) -> None:
-            folder_btn.setEnabled(_has_csv(directory))
-
-        dialog.directoryEntered.connect(_update_folder_btn)
-        _update_folder_btn(str(self._settings.data_folder))
-
-        def _use_current_dir() -> None:
-            selected_folder[0] = Path(dialog.directory().absolutePath())
-            dialog.done(_QDialog.DialogCode.Accepted)
-
-        folder_btn.clicked.connect(_use_current_dir)
-
-        if not dialog.exec():
-            return
-
-        from PyQt6.QtCore import QTimer
-        if selected_folder[0] is not None:
-            folder = selected_folder[0]
-            QTimer.singleShot(50, lambda: self._ctrl.load_dataset(folder))
-            return
-
-        selected = dialog.selectedFiles()
-        if not selected:
-            return
-        path = Path(selected[0])
-        if path.suffix.lower() == ".nsc":
-            nsc_path = path
-            QTimer.singleShot(50, lambda: self._ctrl.load_nsc_file(nsc_path))
-        else:
-            QMessageBox.warning(
-                self, "Unknown format",
-                f"Cannot load '{path.name}'.\n\nSelect a .nsc file, or navigate into a CSV folder and click 'Select This Folder'.",
+        if clicked is csv_btn:
+            folder = QFileDialog.getExistingDirectory(self, "Select CSV folder", start_dir)
+            if not folder:
+                return
+            self._ctrl.load_dataset(Path(folder))
+        elif clicked is nsc_btn:
+            path, _ = QFileDialog.getOpenFileName(
+                self, "Select .nsc file", start_dir, "Finapres NOVA (*.nsc)"
             )
+            if not path:
+                return
+            self._ctrl.load_nsc_file(Path(path))
 
     def _on_phase_changed(self) -> None:
         self.update_markers_table()
