@@ -114,7 +114,7 @@ def main() -> int:
         if not store.has_any_user():
             log.warning("No users in database — bypassing login (first run)")
         else:
-            dlg = LoginDialog(store, counter)
+            dlg = LoginDialog(store, counter, allow_guest=settings.allow_guest)
             if splash:
                 splash.finish(dlg)
             if dlg.exec() != QDialog.DialogCode.Accepted:

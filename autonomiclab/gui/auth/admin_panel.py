@@ -110,6 +110,7 @@ class AdminPanel(QDialog):
         btn_row.addWidget(close_btn)
 
         root.addLayout(btn_row)
+        self._refresh()
 
     def done(self, result: int) -> None:
         """Push users.db to GitHub before closing if a token is configured."""
@@ -125,8 +126,6 @@ class AdminPanel(QDialog):
                     "Ændringerne er gemt lokalt.",
                 )
         super().done(result)
-
-        self._refresh()
 
     # ── table helpers ────────────────────────────────────────────────────────
 

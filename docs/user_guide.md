@@ -139,10 +139,45 @@ AutonomicLab has three access levels:
 | **Investigator** | Full access to all analyses and export |
 | **Guest** | Full access, limited to a fixed number of launches per machine |
 
-Administrators can add, remove, and reset user accounts via **Settings → Admin Panel**.
+### Admin Panel
 
-To create the first administrator account, run `scripts/create_admin.py` from the
-command line on the machine where the program is installed.
+Administrators manage accounts via **Settings → Admin Panel**.
+
+| Action | How |
+|---|---|
+| Add user | Click **Tilføj bruger**, fill in username, display name, role, and password |
+| Edit display name or role | Select a row, click **Rediger** |
+| Change password | Select a row, click **Skift kode** |
+| Enable / disable | Select a row, click **Aktiver / Deaktiver** |
+| Delete | Select a row, click **Slet** |
+
+Click **Luk** to close the panel. Changes are saved locally and automatically
+pushed to the shared user database on GitHub — all other installations will
+receive the updated list the next time they start.
+
+### First run
+
+If no user accounts exist yet, the login dialog is skipped. Open
+**Settings → Admin Panel**, add at least one admin account, and click **Luk**.
+The account is immediately synced to GitHub and active on all machines.
+
+### Disabling guest access
+
+By default, new installations allow up to 10 guest launches per machine.
+To disable guest login entirely, set the following in `config.yaml`:
+
+```yaml
+allow_guest: false
+```
+
+With this setting the **Fortsæt som gæst** button is never shown — a named
+account is required to open the program.
+
+### Downloading without an account
+
+The program can be downloaded by anyone with access to the release page.
+Access control is enforced at login — without a valid username and password
+the program cannot be used (assuming `allow_guest: false`).
 
 ---
 

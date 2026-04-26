@@ -70,7 +70,9 @@ class AppSettings:
 
     @property
     def data_folder(self) -> Path:
-        """Default data folder from config.yaml, falling back to ~/Documents/data."""
+        """Data folder: user prefs override config.yaml, fallback ~/Documents/data."""
+        if override := self._prefs.get("data_folder"):
+            return Path(override)
         if configured := self._config.get("data_folder"):
             return Path(configured)
         return _DEFAULT_DATA_FOLDER
@@ -84,6 +86,11 @@ class AppSettings:
     def users_db_token(self) -> str:
         """GitHub Personal Access Token for users.db sync. Empty = no sync."""
         return self._config.get("users_db_token") or ""
+
+    @property
+    def allow_guest(self) -> bool:
+        """Whether the guest login button is shown. Default True."""
+        return bool(self._config.get("allow_guest", True))
 
     @property
     def users_db_path(self) -> Path:

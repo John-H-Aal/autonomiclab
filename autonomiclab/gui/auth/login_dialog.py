@@ -68,10 +68,11 @@ class LoginDialog(QDialog):
     """
 
     def __init__(self, store: UserStore, guest_counter: GuestCounterStore,
-                 parent=None) -> None:
+                 parent=None, allow_guest: bool = True) -> None:
         super().__init__(parent)
         self._store = store
         self._guest = guest_counter
+        self._allow_guest = allow_guest
 
         self.setWindowTitle("AutonomicLab — Log ind")
         self.setFixedWidth(360)
@@ -123,7 +124,7 @@ class LoginDialog(QDialog):
         root.addWidget(self._login_btn)
 
         remaining = self._guest.remaining()
-        if remaining > 0:
+        if self._allow_guest and remaining > 0:
             root.addSpacing(8)
             self._guest_btn = QPushButton(f"Fortsæt som gæst  ({remaining} lanceringer tilbage)")
             self._guest_btn.setStyleSheet(_BTN_SECONDARY)
