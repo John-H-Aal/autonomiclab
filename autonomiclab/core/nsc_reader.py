@@ -267,9 +267,12 @@ class NscReader:
         y_start = y_raw[0::2][:N].astype(np.float64)  # start raw values
         y_end   = y_raw[1::2][:N].astype(np.float64)  # end raw values
 
-        # Center time for each sample (seconds from recording start)
-        t0 = x_raw[0] * _TICK_S  # recording start time (usually 0)
-        times = (x_start + x_end) / 2.0 * _TICK_S - t0
+        # Center time for each sample, in seconds since the absolute tick origin.
+        # Do NOT subtract a per-channel t0: beat-detected channels (reSYS, etc.)
+        # have their first sample's first tick offset into the recording, so a
+        # per-channel subtraction would shift them out of alignment with the
+        # continuous reBAP waveform.
+        times = (x_start + x_end) / 2.0 * _TICK_S
 
         # Physical value: MinValue + mean(raw) × (MaxValue - MinValue) / 32768
         y_range = meta.max_value - meta.min_value
