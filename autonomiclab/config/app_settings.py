@@ -17,7 +17,7 @@ from autonomiclab.utils.logger import get_logger
 log = get_logger(__name__)
 
 _USER_SETTINGS_FILE = Path.home() / ".autonomiclab" / "settings.yaml"
-_DEFAULT_DATA_FOLDER = Path.home() / "Documents" / "data"
+_DEFAULT_DATA_FOLDER = Path.home() / "Documents" / "AutonomicLab" / "data"
 
 
 def _app_dir() -> Path:
