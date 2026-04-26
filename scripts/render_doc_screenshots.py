@@ -14,7 +14,9 @@ sys.path.insert(0, str(ROOT))
 
 from autonomiclab import __version__
 from autonomiclab.auth.guest_counter import GuestCounterStore
+from autonomiclab.auth.models import Role, User
 from autonomiclab.auth.user_store import UserStore
+from autonomiclab.gui.auth.admin_panel import AdminPanel, _UserFormDialog
 from autonomiclab.gui.auth.login_dialog import LoginDialog
 
 
@@ -52,12 +54,56 @@ def render_login(out: Path) -> None:
     tmp.rmdir()
 
 
+def render_admin(out: Path) -> None:
+    tmp = ROOT / "_tmp_render"
+    tmp.mkdir(exist_ok=True)
+    store = UserStore(tmp / "users.db")
+    store.add_user(User(
+        username="johhan", display_name="John Hansen",
+        password_hash=UserStore.hash_password("x"), role=Role.ADMIN,
+    ))
+    store.add_user(User(
+        username="john", display_name="John Hansen",
+        password_hash=UserStore.hash_password("x"), role=Role.INVESTIGATOR,
+    ))
+
+    dlg = AdminPanel(store, db_token="")
+    dlg.show()
+    QApplication.processEvents()
+    pix = dlg.grab()
+    pix.save(str(out), "PNG")
+    print(f"wrote {out}")
+
+    for f in tmp.iterdir():
+        f.unlink()
+    tmp.rmdir()
+
+
+def render_add_user(out: Path) -> None:
+    tmp = ROOT / "_tmp_render"
+    tmp.mkdir(exist_ok=True)
+    store = UserStore(tmp / "users.db")
+
+    dlg = _UserFormDialog(store)
+    dlg.show()
+    QApplication.processEvents()
+    pix = dlg.grab()
+    pix.save(str(out), "PNG")
+    print(f"wrote {out}")
+
+    for f in tmp.iterdir():
+        f.unlink()
+    tmp.rmdir()
+
+
 def main() -> None:
     app = QApplication(sys.argv)
     figs = ROOT / "docs" / "figs"
     figs.mkdir(exist_ok=True)
     render_splash(figs / "splash.png")
     render_login(figs / "login.png")
+    render_admin(figs / "admin_panel.png")
+    render_add_user(figs / "add_user.png")
     app.quit()
 
 

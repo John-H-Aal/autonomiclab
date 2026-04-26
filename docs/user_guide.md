@@ -152,6 +152,8 @@ AutonomicLab has three access levels:
 
 Administrators manage accounts via **Admin → Manage Users…**.
 
+![User Administration panel](figs/admin_panel.png)
+
 | Action | How |
 |---|---|
 | Add user | Click **Add User**, fill in username, display name, role, and password |
@@ -160,9 +162,45 @@ Administrators manage accounts via **Admin → Manage Users…**.
 | Enable / disable | Select a row, click **Enable / Disable** |
 | Delete | Select a row, click **Delete** |
 
-Click **Close** to close the panel. Changes are saved locally and automatically
-pushed to the shared user database on GitHub — all other installations will
-receive the updated list the next time they start.
+The **Add User** dialog:
+
+![Add User dialog](figs/add_user.png)
+
+Click **Close** to close the panel.
+
+### How the user list is shared
+
+The list of users (`users.db`) is stored in a private GitHub repository
+(`John-H-Aal/autonomiclab-users`) and shared between all installations
+of AutonomicLab. The `config.yaml` next to `AutonomicLab.exe` contains a
+GitHub access token that lets the program read and write this file.
+
+**On every program launch (if the machine is online):**
+
+1. The program contacts GitHub and fetches the latest `users.db`.
+2. If it differs from the local copy, the local copy is overwritten.
+3. Login then proceeds against this fresh list.
+
+If the machine is offline at startup, the program uses the locally cached
+`users.db` from the last successful sync — login still works as long as
+the user has signed in on that machine before.
+
+**When an administrator closes the Admin Panel:**
+
+1. Local changes (added users, password resets, role changes, deletions)
+   are saved to the local `users.db`.
+2. The local `users.db` is uploaded back to GitHub, replacing the remote
+   copy.
+3. The next time any other user launches the program, step 1 above pulls
+   the new version automatically.
+
+This means an administrator can sit at their own machine, manage users,
+and within seconds every other user worldwide gets the updated list on
+their next launch — no manual file copying required.
+
+If the upload fails (no internet, expired token, etc.) the changes remain
+on the admin's local machine and a warning is shown. The next successful
+admin-panel close will push them.
 
 ### First run
 
@@ -179,7 +217,7 @@ To disable guest login entirely, set the following in `config.yaml`:
 allow_guest: false
 ```
 
-With this setting the **Fortsæt som gæst** button is never shown — a named
+With this setting the **Continue as guest** button is never shown — a named
 account is required to open the program.
 
 ### Downloading without an account
