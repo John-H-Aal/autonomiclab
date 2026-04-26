@@ -26,8 +26,10 @@ Log: `autonomiclab.log` in project root.
 
 ## Auth system
 - Three roles: admin, investigator, guest (10-launch MAC-bound counter).
-- `users.db` = encrypted SQLite (Fernet-encrypted records, bcrypt password hashes). On launch, `autonomiclab/auth/sync.py:sync_users_db()` GETs `users.db` from the private GitHub repo `John-H-Aal/autonomiclab-users` via the Contents API and replaces the local copy if it differs. The PAT used for the call lives in `config.yaml` under `users_db_token` (currently a single combined-scope PAT shipped in every installer; embedded by `installer.iss` from CI secret `USERS_DB_TOKEN`). Offline-tolerant: silent skip on failure.
-- Admin Panel close calls `push_users_db()` (PUT with current SHA) using the same token, so admin edits propagate to all installations.
+- `users.db` = encrypted SQLite (Fernet-encrypted records, bcrypt password hashes). On launch, `autonomiclab/auth/sync.py:sync_users_db()` GETs `users.db` from the private GitHub repo `John-H-Aal/autonomiclab-users` via the Contents API and replaces the local copy if it differs. Offline-tolerant: silent skip on failure.
+- Two PATs are used:
+  - `users_db_token` — read-only (Contents: read); shipped in every installer via CI secret `USERS_DB_READ_TOKEN`; used only by `sync_users_db()` on launch.
+  - `users_db_admin_token` — write-capable; NOT shipped; admin adds manually to `config.yaml` on their machine. Used only by `push_users_db()` when Admin Panel closes. If absent, Admin Panel close shows a "Sync not configured" warning instead of pushing.
 - **First-run bypass**: if `users.db` has no users, the login dialog is skipped. Seed the first admin via `scripts/create_admin.py`.
 - Admin menu in `MainWindow` visible only when `auth_session.is_admin()`.
 
