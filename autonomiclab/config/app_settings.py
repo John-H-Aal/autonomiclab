@@ -17,7 +17,7 @@ from autonomiclab.utils.logger import get_logger
 log = get_logger(__name__)
 
 _USER_SETTINGS_FILE = Path.home() / ".autonomiclab" / "settings.yaml"
-_DEFAULT_DATA_FOLDER = Path.home() / "Documents" / "data"
+_DEFAULT_DATA_FOLDER = Path.home() / "Documents" / "AutonomicLab" / "data"
 
 
 def _app_dir() -> Path:
@@ -70,9 +70,11 @@ class AppSettings:
 
     @property
     def data_folder(self) -> Path:
-        """Data folder: user prefs override config.yaml, fallback ~/Documents/data."""
+        """Data folder: user prefs override config.yaml, fallback ~/Documents/AutonomicLab/data."""
         if override := self._prefs.get("data_folder"):
-            return Path(override)
+            p = Path(override)
+            if p.exists():
+                return p
         if configured := self._config.get("data_folder"):
             return Path(configured)
         return _DEFAULT_DATA_FOLDER

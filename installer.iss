@@ -5,6 +5,9 @@
   #define AppVersion "1.0.0"
 #endif
 #define AppPublisher "Astrid Juhl Terkelsen, Aarhus University"
+#ifndef UsersDbToken
+  #define UsersDbToken ""
+#endif
 #define AppURL "https://github.com/John-H-Aal/autonomiclab"
 #define AppExeName "AutonomicLab.exe"
 
@@ -74,7 +77,8 @@ begin
       StringChangeEx(DocsPath, '\', '/', True);
       ConfigContent.Add('data_folder: "' + DocsPath + '"');
       ConfigContent.Add('');
-      ConfigContent.Add('users_db_url: "https://www.dropbox.com/scl/fi/umzudbbk5rk57hapty1kp/users.db?rlkey=ick7tco73y3m1eqrpvvhttjva&st=o7s9vf1b&dl=1"');
+      ConfigContent.Add('users_db_token: "{#UsersDbToken}"');
+      ConfigContent.Add('allow_guest: true');
       ConfigContent.SaveToFile(ConfigFile);
     finally
       ConfigContent.Free;

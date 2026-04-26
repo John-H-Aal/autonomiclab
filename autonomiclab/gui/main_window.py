@@ -366,15 +366,17 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
         def _use_current_dir() -> None:
             selected_folder[0] = Path(dialog.directory().absolutePath())
-            _QDialog.accept(dialog)
+            dialog.done(_QDialog.DialogCode.Accepted)
 
         folder_btn.clicked.connect(_use_current_dir)
 
         if not dialog.exec():
             return
 
+        from PyQt6.QtCore import QTimer
         if selected_folder[0] is not None:
-            self._ctrl.load_dataset(selected_folder[0])
+            folder = selected_folder[0]
+            QTimer.singleShot(50, lambda: self._ctrl.load_dataset(folder))
             return
 
         selected = dialog.selectedFiles()
@@ -382,7 +384,8 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
             return
         path = Path(selected[0])
         if path.suffix.lower() == ".nsc":
-            self._ctrl.load_nsc_file(path)
+            nsc_path = path
+            QTimer.singleShot(50, lambda: self._ctrl.load_nsc_file(nsc_path))
         else:
             QMessageBox.warning(
                 self, "Unknown format",

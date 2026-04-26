@@ -47,7 +47,7 @@ jobs:
             Set-Content autonomiclab/__init__.py
 
       - name: Install tools
-        run: choco install upx innosetup pandoc rclone --yes
+        run: choco install upx innosetup pandoc --yes
 
       - name: Build EXE
         run: |
@@ -76,7 +76,9 @@ jobs:
         run: choco install wkhtmltopdf --yes
 
       - name: Generate PDF user guide
-        run: pandoc docs/user_guide.md -o "dist/UserGuide-${{ github.ref_name }}.pdf" --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+        run: |
+          pandoc docs/user_guide.md -o "dist/UserGuide.pdf" --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+          Copy-Item "dist/UserGuide.pdf" "dist/UserGuide-${{ github.ref_name }}.pdf"
         continue-on-error: true
 
       - name: Create installer config template
@@ -91,10 +93,11 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           $password = "${{ secrets.INSTALLER_PASSWORD }}"
+          $token = "${{ secrets.USERS_DB_TOKEN }}"
           if ($password) {
-            iscc /DAppVersion=$version /DAppPassword=$password installer.iss
+            iscc /DAppVersion=$version /DAppPassword=$password /DUsersDbToken=$token installer.iss
           } else {
-            iscc /DAppVersion=$version installer.iss
+            iscc /DAppVersion=$version /DUsersDbToken=$token installer.iss
           }
 
       - name: Upload installer to release
@@ -104,11 +107,3 @@ jobs:
             dist/AutonomicLab_Setup.exe
             dist/UserGuide-${{ github.ref_name }}.pdf
 
-      - name: Upload to OneDrive
-        run: |
-          $config = @'
-          ${{ secrets.RCLONE_CONF }}
-          '@
-          $config | Out-File -FilePath rclone_temp.conf -Encoding utf8
-          rclone --config rclone_temp.conf copy dist\AutonomicLab_Setup.exe RCLONE_CONF:AutonomicLab/
-          Remove-Item rclone_temp.conf
