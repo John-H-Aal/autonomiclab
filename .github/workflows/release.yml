@@ -93,7 +93,7 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           $password = "${{ secrets.INSTALLER_PASSWORD }}"
-          $token = "${{ secrets.USERS_DB_TOKEN }}"
+          $token = "${{ secrets.USERS_DB_READ_TOKEN }}"
           if ($password) {
             iscc /DAppVersion=$version /DAppPassword=$password /DUsersDbToken=$token installer.iss
           } else {
