@@ -4,10 +4,10 @@
 
 ### DOCS — Documentation refresh
 
-- [ ] **DOCS-01** — `CLAUDE.md` Auth section describes GitHub Contents API sync via `users_db_token`, not Dropbox/OneDrive or `users_db_url`
-- [ ] **DOCS-02** — `CLAUDE.md` and `BUILDING.md` release-artifact lists match what `.github/workflows/release.yml` actually uploads (`AutonomicLab_Setup_<version>.exe`, `UserGuide-<version>.pdf`)
-- [ ] **DOCS-03** — `INSTALLATION.md` Step 4 config.yaml path matches `installer.iss` (`{app}\config.yaml`, not `%LocalAppData%`)
-- [ ] **DOCS-04** — `README.md` links to `docs/user_guide.md`, states correct Python version (matches CI), and notes the auth/login behaviour on first run
+- [x] **DOCS-01** — `CLAUDE.md` Auth section describes GitHub Contents API sync via `users_db_token`, not Dropbox/OneDrive or `users_db_url`
+- [x] **DOCS-02** — `CLAUDE.md` and `BUILDING.md` release-artifact lists match what `.github/workflows/release.yml` actually uploads (`AutonomicLab_Setup_<version>.exe`, `UserGuide-<version>.pdf`)
+- [x] **DOCS-03** — `INSTALLATION.md` Step 4 config.yaml path matches `installer.iss` (`{app}\config.yaml`, not `%LocalAppData%`)
+- [x] **DOCS-04** — `README.md` links to `docs/user_guide.md`, states correct Python version (matches CI), and notes the auth/login behaviour on first run
 
 ### AUTH — users.db token split
 
@@ -30,14 +30,14 @@
 
 ## Traceability
 
-| REQ-ID | Phase |
-|--------|-------|
-| DOCS-01 | Phase 1 |
-| DOCS-02 | Phase 1 |
-| DOCS-03 | Phase 1 |
-| DOCS-04 | Phase 1 |
-| AUTH-01 | Phase 2 |
-| AUTH-02 | Phase 2 |
-| AUTH-03 | Phase 2 |
-| AUTH-04 | Phase 2 |
-| AUTH-05 | Phase 2 |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| DOCS-01 | Phase 1 | Done (01-01, commit 05f44fc) |
+| DOCS-02 | Phase 1 | Done (01-01, commits 05f44fc, 122343d) |
+| DOCS-03 | Phase 1 | Done (01-01, commit 3227b18) |
+| DOCS-04 | Phase 1 | Done (01-01, commit d68e2bd) |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |

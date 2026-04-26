@@ -8,17 +8,32 @@
 ## Current Position
 
 - Project initialized via `/gsd-new-project`. Codebase already mapped under `.planning/codebase/` (v1.0.31 snapshot).
-- Phase 1 (Doc & Memory Refresh) context captured — `01-CONTEXT.md` and `01-DISCUSSION-LOG.md` written.
-- 0 of 2 phases executed.
-- Next action: `/gsd-plan-phase 1`.
+- Phase 1 (Doc & Memory Refresh) context captured and **executed** — plan 01-01 complete; all four DOCS-* requirements satisfied.
+- 1 of 2 phases executed.
+- Next action: `/gsd-plan-phase 2` (token split).
 
 ## Active Phase
 
-Phase 1 — Doc & Memory Refresh (context gathered, awaiting plan)
+Phase 2 — users.db Token Split (awaiting plan)
 
 ## Recent Commits
 
-(see git log; planning artifacts committed at init)
+- d68e2bd docs(01-01): add README user-guide pointer + first-run login note [DOCS-04]
+- 3227b18 docs(01-01): fix INSTALLATION.md Step 4 config.yaml path [DOCS-03]
+- 122343d docs(01-01): correct BUILDING.md release-artifact list [DOCS-02]
+- 05f44fc docs(01-01): refresh CLAUDE.md auth + release sections [DOCS-01, DOCS-02]
+
+## Performance Metrics
+
+| Phase-Plan | Duration | Tasks | Files |
+|------------|----------|-------|-------|
+| 01-01      | 86 sec   | 4     | 4     |
+
+## Last Session
+
+- Completed 01-01-PLAN.md (2026-04-26)
+- Stopped at: Phase 1 complete; ready for Phase 2 planning.
+- Resume file: `.planning/phases/01-doc-and-memory-refresh/01-01-SUMMARY.md`
 
 ## Open Questions / Risks
 

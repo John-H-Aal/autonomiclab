@@ -3,10 +3,10 @@
 **Milestone:** v1.1.0 — Token-split + doc refresh
 **Phases:** 2 | **Requirements mapped:** 9 | **Coverage:** 100%
 
-| # | Phase | Goal | Requirements | Plans (est.) |
-|---|-------|------|--------------|--------------|
-| 1 | Doc & Memory Refresh | Project docs describe the v1.0.31+ code, not pre-Dropbox-removal behaviour | DOCS-01, DOCS-02, DOCS-03, DOCS-04 | 1 |
-| 2 | users.db Token Split | Shipped installers can no longer push `users.db` — only admins with a separate admin PAT can | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | 2–3 |
+| # | Phase | Goal | Requirements | Plans (est.) | Progress |
+|---|-------|------|--------------|--------------|----------|
+| 1 | Doc & Memory Refresh | Project docs describe the v1.0.31+ code, not pre-Dropbox-removal behaviour | DOCS-01, DOCS-02, DOCS-03, DOCS-04 | 1 | 1/1 plans complete |
+| 2 | users.db Token Split | Shipped installers can no longer push `users.db` — only admins with a separate admin PAT can | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | 2–3 | 0/3 plans |
 
 ---
 
