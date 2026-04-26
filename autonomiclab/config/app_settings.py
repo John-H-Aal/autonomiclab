@@ -70,9 +70,11 @@ class AppSettings:
 
     @property
     def data_folder(self) -> Path:
-        """Data folder: user prefs override config.yaml, fallback ~/Documents/data."""
+        """Data folder: user prefs override config.yaml, fallback ~/Documents/AutonomicLab/data."""
         if override := self._prefs.get("data_folder"):
-            return Path(override)
+            p = Path(override)
+            if p.exists():
+                return p
         if configured := self._config.get("data_folder"):
             return Path(configured)
         return _DEFAULT_DATA_FOLDER
