@@ -24,11 +24,16 @@ Copy your Finapres dataset folders here.
 
 ## Step 4 — Configure data path (if needed)
 
-If your data is stored elsewhere, open `config.yaml` in the installation folder
-and change the `data_folder` path:
+If your data is stored elsewhere, open the installed `config.yaml`:
 
 ```
 C:\Users\YourName\AppData\Local\AutonomicLab\config.yaml
+```
+
+and edit the `data_folder` value:
+
+```yaml
+data_folder: "C:/Users/YourName/Documents/your-data-folder"
 ```
 
 ## Uninstalling
