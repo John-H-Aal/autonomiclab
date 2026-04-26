@@ -101,6 +101,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/AutonomicLab_Setup.exe
+            dist/AutonomicLab_Setup_*.exe
             dist/UserGuide-${{ github.ref_name }}.pdf
 

@@ -117,3 +117,26 @@ class InteractivePlotWidget(pg.GraphicsLayoutWidget):
         for curve in self._plot_curves.get(plot_id, []):
             self.all_curves.append((plot, curve))
         log.debug("Tracking: %d plots, %d curves", len(self.plots), len(self.all_curves))
+
+    # ── safe clear ────────────────────────────────────────────────────────────
+
+    def clear(self) -> None:
+        """Remove tracked items from the scene before parent clear().
+
+        pyqtgraph's GraphicsLayoutWidget.clear() deletes the C++ ViewBoxes
+        but leaves any standalone scene items (InfiniteLines used as markers)
+        with stale parent references. Their boundingRect() then crashes on
+        the next paint. Explicitly remove them first to break the chain.
+        """
+        scene = self.scene()
+        for line in list(self.marker_lines.values()):
+            try:
+                if line.scene() is scene:
+                    scene.removeItem(line)
+            except Exception:
+                pass
+        self.marker_lines = {}
+        self.plots = []
+        self.all_curves = []
+        self._plot_curves = {}
+        super().clear()

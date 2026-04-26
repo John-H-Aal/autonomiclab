@@ -20,7 +20,7 @@ AppPublisherURL={#AppURL}
 DefaultDirName={localappdata}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=dist
-OutputBaseFilename=AutonomicLab_Setup
+OutputBaseFilename=AutonomicLab_Setup_{#AppVersion}
 SetupIconFile=assets\autonomiclab.ico
 Compression=lzma
 SolidCompression=yes
@@ -62,26 +62,22 @@ Filename: "{app}\{#AppExeName}"; Description: "Launch AutonomicLab"; Flags: nowa
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ConfigFile: string;
-  ConfigContent: TStringList;
+  Lines: TArrayOfString;
   DocsPath: string;
 begin
   if CurStep = ssPostInstall then
   begin
     DocsPath := ExpandConstant('{userdocs}\AutonomicLab\data');
+    StringChangeEx(DocsPath, '\', '/', True);
     ConfigFile := ExpandConstant('{app}\config.yaml');
-    ConfigContent := TStringList.Create;
-    try
-      ConfigContent.Add('# AutonomicLab configuration');
-      ConfigContent.Add('# Edit data_folder to match the location of your Finapres data');
-      ConfigContent.Add('');
-      StringChangeEx(DocsPath, '\', '/', True);
-      ConfigContent.Add('data_folder: "' + DocsPath + '"');
-      ConfigContent.Add('');
-      ConfigContent.Add('users_db_token: "{#UsersDbToken}"');
-      ConfigContent.Add('allow_guest: true');
-      ConfigContent.SaveToFile(ConfigFile);
-    finally
-      ConfigContent.Free;
-    end;
+    SetArrayLength(Lines, 7);
+    Lines[0] := '# AutonomicLab configuration';
+    Lines[1] := '# Edit data_folder to match the location of your Finapres data';
+    Lines[2] := '';
+    Lines[3] := 'data_folder: "' + DocsPath + '"';
+    Lines[4] := '';
+    Lines[5] := 'users_db_token: "{#UsersDbToken}"';
+    Lines[6] := 'allow_guest: true';
+    SaveStringsToUTF8File(ConfigFile, Lines, False);
   end;
 end;
