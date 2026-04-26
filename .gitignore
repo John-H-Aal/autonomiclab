@@ -33,3 +33,6 @@ data/
 # Auth runtime files
 users.db
 guest_counter.json
+
+# Claude Code local settings
+.claude/settings.local.json
