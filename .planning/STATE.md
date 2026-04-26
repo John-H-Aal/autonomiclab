@@ -14,13 +14,13 @@
 
 ## Active Phase
 
-Phase 2 — users.db Token Split (02-01 and 02-02 complete; 02-03 pending)
+Phase 2 — users.db Token Split — COMPLETE (all 3 plans executed)
 
 ## Recent Commits
 
+- f9f3096 docs(user-guide): add admin token setup note [AUTH-05]
+- ef9a9c5 docs(auth): update CLAUDE.md to describe two-token sync model [AUTH-05]
 - 266b5e3 ci: rename USERS_DB_TOKEN secret to USERS_DB_READ_TOKEN [AUTH-03]
-- ed93e39 feat(auth): pass users_db_admin_token to AdminPanel [AUTH-02]
-- 36ca875 feat(auth): add users_db_admin_token property to AppSettings [AUTH-04]
 
 ## Performance Metrics
 
@@ -29,17 +29,17 @@ Phase 2 — users.db Token Split (02-01 and 02-02 complete; 02-03 pending)
 | 01-01      | 86 sec   | 4     | 4     |
 | 02-01      | —        | 3     | 3     |
 | 02-02      | 5m       | 2     | 1     |
+| 02-03      | 8 min    | 2     | 2     |
 
 ## Last Session
 
-- Completed 02-02-PLAN.md (2026-04-26)
-- Stopped at: Phase 2 plans 01 and 02 complete; 02-03 (docs) pending.
-- Resume file: `.planning/phases/02-users-db-token-split/02-02-SUMMARY.md`
+- Completed 02-03-PLAN.md (2026-04-26)
+- Stopped at: Phase 2 complete — all AUTH-01..05 requirements satisfied.
+- Resume file: `.planning/phases/02-users-db-token-split/02-03-SUMMARY.md`
 
 ## Open Questions / Risks
 
-- **AUTH-04 storage choice:** keyring vs admin-side `config.yaml` line — defer to Phase 2 discuss.
-- **AUTH-05 rotation timing:** must follow at least one verified release with split tokens; coordinate with Astrid before revoking on GitHub.
+- **AUTH-05 rotation timing:** must follow at least one verified release with split tokens; coordinate with Astrid before revoking on GitHub. Checklist is in 02-03-SUMMARY.md.
 - **Existing dev-tree `config.yaml`** at the project root contains a real-looking PAT (gitignored, not in repo history). On rotation, this local file's value also becomes invalid — reminder for John, no code change needed.
 
 ## Decisions Log
