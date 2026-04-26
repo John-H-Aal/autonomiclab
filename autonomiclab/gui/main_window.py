@@ -86,7 +86,6 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         self._state    = AppState()
 
         self._init_ui()
-        self._init_empty_plots()
 
         # Controller created after widgets exist so it can receive plot_widget
         self._ctrl = AppController(self._state, self, self.plot_widget)

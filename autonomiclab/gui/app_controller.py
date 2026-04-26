@@ -157,6 +157,8 @@ class AppController:
         st.last_result       = None
         self._w.set_export_enabled(False)
 
+        from PyQt6.QtWidgets import QApplication
+        QApplication.processEvents()  # flush pending paints before clearing old plot objects
         self._plot.setUpdatesEnabled(False)
         try:
             if phase == "All":
