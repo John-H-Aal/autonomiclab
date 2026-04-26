@@ -304,7 +304,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         from autonomiclab.auth.user_store import UserStore
         from autonomiclab.gui.auth.admin_panel import AdminPanel
         store = UserStore(self._settings.users_db_path)
-        dlg   = AdminPanel(store, parent=self)
+        dlg   = AdminPanel(store, parent=self, db_token=self._settings.users_db_token)
         dlg.exec()
 
     def showEvent(self, event) -> None:

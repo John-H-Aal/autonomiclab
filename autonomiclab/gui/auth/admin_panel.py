@@ -50,9 +50,10 @@ class AdminPanel(QDialog):
 
     _COLS = ["Brugernavn", "Visningsnavn", "Rolle", "Aktiv"]
 
-    def __init__(self, store: UserStore, parent=None) -> None:
+    def __init__(self, store: UserStore, parent=None, db_token: str = "") -> None:
         super().__init__(parent)
-        self._store = store
+        self._store    = store
+        self._db_token = db_token
         self.setWindowTitle("Brugeradministration")
         self.resize(700, 480)
 
@@ -109,6 +110,21 @@ class AdminPanel(QDialog):
         btn_row.addWidget(close_btn)
 
         root.addLayout(btn_row)
+
+    def done(self, result: int) -> None:
+        """Push users.db to GitHub before closing if a token is configured."""
+        if self._db_token:
+            from autonomiclab.auth.sync import push_users_db
+            from autonomiclab.config.app_settings import AppSettings
+            db_path = AppSettings().users_db_path
+            if not push_users_db(self._db_token, db_path):
+                from PyQt6.QtWidgets import QMessageBox
+                QMessageBox.warning(
+                    self, "Sync fejlede",
+                    "Kunne ikke synkronisere brugerlisten til GitHub.\n"
+                    "Ændringerne er gemt lokalt.",
+                )
+        super().done(result)
 
         self._refresh()
 

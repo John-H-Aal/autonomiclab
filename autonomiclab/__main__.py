@@ -103,9 +103,9 @@ def main() -> int:
         db_path      = settings.users_db_path
         counter_path = db_path.parent / "guest_counter.json"
 
-        # Try to pull a fresher users.db from OneDrive (silently skipped offline).
-        if settings.users_db_url:
-            sync_users_db(settings.users_db_url, db_path)
+        # Try to pull a fresher users.db from GitHub (silently skipped offline).
+        if settings.users_db_token:
+            sync_users_db(settings.users_db_token, db_path)
 
         store   = UserStore(db_path)
         counter = GuestCounterStore(counter_path)
