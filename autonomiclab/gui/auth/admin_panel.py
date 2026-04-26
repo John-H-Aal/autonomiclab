@@ -125,6 +125,12 @@ class AdminPanel(QDialog):
                     "Could not sync the user list to GitHub.\n"
                     "Changes are saved locally.",
                 )
+        else:
+            QMessageBox.warning(
+                self, "Sync not configured",
+                "Changes saved locally.\n"
+                "Add users_db_admin_token to config.yaml to enable GitHub sync."
+            )
         super().done(result)
 
     # ── table helpers ────────────────────────────────────────────────────────
