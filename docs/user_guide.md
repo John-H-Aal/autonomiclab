@@ -10,18 +10,44 @@ This is expected for software without a commercial code-signing certificate.
 
 Click **More info**, then **Run anyway** to proceed.
 
-A splash screen appears while the program loads.
+A splash screen appears while the program loads, followed by the login dialog.
+
+---
+
+## Logging in
+
+When the program starts, a login dialog is shown.
+
+- Enter your **username** and **password** and click **Log in**.
+- If you do not have an account, click **Fortsæt som gæst** to launch as a guest.
+  Guest access is limited to a fixed number of launches per machine.
+  Contact your administrator to create a personal account.
+
+If no user accounts have been created yet (first run), the login dialog is skipped
+and you go directly to the main window.
 
 ---
 
 ## Loading a dataset
 
-1. Click **Select Dataset** in the left panel
-2. Navigate to a folder containing Finapres NOVA data files
-3. The folder must contain a `*Markers.csv` file and the associated signal CSVs
-4. Click **Select Folder**
+Click **Open Dataset** in the left panel. A file browser opens.
+
+### CSV dataset (folder)
+
+1. Navigate into the folder containing your Finapres data files using double-click.
+2. The folder must contain a `*Markers.csv` file and the associated signal CSVs.
+3. Click **Select This Folder** (bottom right of the dialog).
 
 The program automatically detects the datetime prefix and loads all signals.
+
+### Finapres NOVA recording (.nsc file)
+
+1. Navigate to the `.nsc` file.
+2. Single-click the file to select it.
+3. Click **Open**.
+
+> **Note:** `.nsc` files do not contain protocol markers, so the markers table will be empty
+> and phase filtering is not available for this format.
 
 ---
 
@@ -50,12 +76,31 @@ Use the **Phase** dropdown in the left panel to switch between:
 - **Stand Test** — zooms to Stand Test segments
 - **Deep Breathing** — zooms to Deep Breathing segments
 
+Phase filtering is only available for CSV datasets that contain a markers file.
+
 ---
 
 ## Markers table
 
 The left panel shows all markers from the recording with time (s), phase, and label.
 Click a marker row to jump to that time point in the plot.
+
+---
+
+## Raw Data Viewer
+
+Click **View Raw Data** to open the raw signal viewer for the loaded dataset.
+
+The viewer shows individual waveforms and beat-by-beat signals on aligned time axes:
+
+- **Blood pressure** — reBAP waveform
+- **Heart rate** — HR AP and HR ECG (RR-interval)
+- **Airway pressure** — PAirway
+- **PTT** — Pulse Transit Time (shown when both HR AP and HR ECG are available)
+- **ECG leads** — I, II, III, aVR, aVL, aVF, C1
+
+Use the checkboxes in the left panel of the viewer to show or hide individual ECG leads.
+Axes are linked: panning or zooming one plot moves all plots together.
 
 ---
 
@@ -84,11 +129,30 @@ Place your Finapres dataset folders inside this folder — one subfolder per rec
 
 ---
 
+## User accounts
+
+AutonomicLab has three access levels:
+
+| Role | Access |
+|---|---|
+| **Admin** | Full access, including the Admin panel (user management) |
+| **Investigator** | Full access to all analyses and export |
+| **Guest** | Full access, limited to a fixed number of launches per machine |
+
+Administrators can add, remove, and reset user accounts via **Settings → Admin Panel**.
+
+To create the first administrator account, run `scripts/create_admin.py` from the
+command line on the machine where the program is installed.
+
+---
+
 ## Troubleshooting
 
 | Problem | Solution |
-|---------|----------|
+|---|---|
 | No signals shown after loading | Check that CSV files have the correct datetime prefix format |
-| Markers table is empty | Ensure a `*Markers.csv` file exists in the selected folder |
+| Markers table is empty | Ensure a `*Markers.csv` file exists in the selected folder, or note that .nsc files do not carry markers |
+| "Select This Folder" is greyed out | The current folder contains no CSV files — navigate to the correct dataset folder |
 | Program loads slowly | Normal on first start — splash screen is shown during loading |
 | Export fails | Ensure the data folder is writable |
+| Guest launches exhausted | Contact your administrator to create a personal account |
