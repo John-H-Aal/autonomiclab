@@ -90,6 +90,11 @@ class AppSettings:
         return self._config.get("users_db_token") or ""
 
     @property
+    def users_db_admin_token(self) -> str:
+        """GitHub Personal Access Token for admin push. Empty = no push."""
+        return self._config.get("users_db_admin_token") or ""
+
+    @property
     def allow_guest(self) -> bool:
         """Whether the guest login button is shown. Default True."""
         return bool(self._config.get("allow_guest", True))
