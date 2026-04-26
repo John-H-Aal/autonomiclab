@@ -13,7 +13,7 @@
 
 - [ ] **AUTH-01** — `autonomiclab/auth/sync.py:sync_users_db` reads from a fine-grained PAT scoped to **Contents: read** on `John-H-Aal/autonomiclab-users` only
 - [ ] **AUTH-02** — `autonomiclab/auth/sync.py:push_users_db` requires a separate admin PAT (e.g. `users_db_admin_token`); refuses to push if absent
-- [ ] **AUTH-03** — `installer.iss` writes only the read-only PAT into the installed `config.yaml`; the GitHub Actions secret used is `USERS_DB_READ_TOKEN` (the existing `USERS_DB_TOKEN` write-capable secret is no longer embedded)
+- [x] **AUTH-03** — `installer.iss` writes only the read-only PAT into the installed `config.yaml`; the GitHub Actions secret used is `USERS_DB_READ_TOKEN` (the existing `USERS_DB_TOKEN` write-capable secret is no longer embedded)
 - [ ] **AUTH-04** — Admin Panel asks for the admin PAT on first push attempt and persists it locally on the admin's machine only (e.g. OS keyring or admin-side `config.yaml` line not present in default installer output)
 - [ ] **AUTH-05** — The previously-distributed combined-scope PAT is rotated/revoked on GitHub after at least one release with the split tokens has been verified working
 
@@ -38,6 +38,6 @@
 | DOCS-04 | Phase 1 | Done (01-01, commit d68e2bd) |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Done (02-02, commit 266b5e3) |
 | AUTH-04 | Phase 2 | Pending |
 | AUTH-05 | Phase 2 | Pending |

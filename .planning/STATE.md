@@ -14,26 +14,27 @@
 
 ## Active Phase
 
-Phase 2 — users.db Token Split (awaiting plan)
+Phase 2 — users.db Token Split (02-01 and 02-02 complete; 02-03 pending)
 
 ## Recent Commits
 
-- d68e2bd docs(01-01): add README user-guide pointer + first-run login note [DOCS-04]
-- 3227b18 docs(01-01): fix INSTALLATION.md Step 4 config.yaml path [DOCS-03]
-- 122343d docs(01-01): correct BUILDING.md release-artifact list [DOCS-02]
-- 05f44fc docs(01-01): refresh CLAUDE.md auth + release sections [DOCS-01, DOCS-02]
+- 266b5e3 ci: rename USERS_DB_TOKEN secret to USERS_DB_READ_TOKEN [AUTH-03]
+- ed93e39 feat(auth): pass users_db_admin_token to AdminPanel [AUTH-02]
+- 36ca875 feat(auth): add users_db_admin_token property to AppSettings [AUTH-04]
 
 ## Performance Metrics
 
 | Phase-Plan | Duration | Tasks | Files |
 |------------|----------|-------|-------|
 | 01-01      | 86 sec   | 4     | 4     |
+| 02-01      | —        | 3     | 3     |
+| 02-02      | 5m       | 2     | 1     |
 
 ## Last Session
 
-- Completed 01-01-PLAN.md (2026-04-26)
-- Stopped at: Phase 1 complete; ready for Phase 2 planning.
-- Resume file: `.planning/phases/01-doc-and-memory-refresh/01-01-SUMMARY.md`
+- Completed 02-02-PLAN.md (2026-04-26)
+- Stopped at: Phase 2 plans 01 and 02 complete; 02-03 (docs) pending.
+- Resume file: `.planning/phases/02-users-db-token-split/02-02-SUMMARY.md`
 
 ## Open Questions / Risks
 
@@ -51,6 +52,8 @@ Phase 2 — users.db Token Split (awaiting plan)
 | 2026-04-26 | Phase 1 docs describe v1.0.31 state only (no Phase 2 forward-refs) | Two clean edits beat one preemptive edit; protects against Phase 2 delay |
 | 2026-04-26 | README adds one-line `## For users` link to user_guide.md | README stays dev-focused; user_guide owns user content |
 | 2026-04-26 | Drop Python-version edit from DOCS-04 | README "3.9+" already matches setup.py; CI 3.12 is unrelated build detail |
+| 2026-04-26 | USERS_DB_TOKEN secret reference replaced with USERS_DB_READ_TOKEN in release.yml; /DUsersDbToken Inno Setup flag name unchanged | Explicit names prevent confusion about PAT scope; /D flag is internal to Inno Setup |
+| 2026-04-26 | installer.iss config-write block verified: no users_db_admin_token line | Admin PAT must never appear in installer-generated config.yaml; verified absent (AUTH-03 satisfied) |
 
 ## Todos Captured
 

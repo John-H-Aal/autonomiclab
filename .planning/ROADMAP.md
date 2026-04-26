@@ -6,7 +6,7 @@
 | # | Phase | Goal | Requirements | Plans (est.) | Progress |
 |---|-------|------|--------------|--------------|----------|
 | 1 | Doc & Memory Refresh | Project docs describe the v1.0.31+ code, not pre-Dropbox-removal behaviour | DOCS-01, DOCS-02, DOCS-03, DOCS-04 | 1 | 1/1 plans complete |
-| 2 | users.db Token Split | Shipped installers can no longer push `users.db` — only admins with a separate admin PAT can | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | 3 | 0/3 plans |
+| 2 | users.db Token Split | Shipped installers can no longer push `users.db` — only admins with a separate admin PAT can | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | 3 | 2/3 plans complete |
 
 ---
 
@@ -34,8 +34,8 @@
 **Requirements:** AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05
 
 **Plans:**
-- [ ] 02-01-PLAN.md — Python source: add users_db_admin_token property, update AdminPanel caller, add missing-token warning
-- [ ] 02-02-PLAN.md — CI: rename USERS_DB_TOKEN → USERS_DB_READ_TOKEN in release.yml; verify installer.iss
+- [x] 02-01-PLAN.md — Python source: add users_db_admin_token property, update AdminPanel caller, add missing-token warning
+- [x] 02-02-PLAN.md — CI: rename USERS_DB_TOKEN → USERS_DB_READ_TOKEN in release.yml; verify installer.iss
 - [ ] 02-03-PLAN.md — Docs: update CLAUDE.md and user_guide.md for two-token model; AUTH-05 rotation checklist
 
 **Success criteria:**
