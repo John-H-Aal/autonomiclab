@@ -1,4 +1,4 @@
-name: Build and Release Windows Installer
+name: Build and Release
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       - name: Run tests
         run: pytest
 
-  build:
+  build-windows:
     runs-on: windows-latest
     needs: test
 
@@ -107,3 +107,108 @@ jobs:
             dist/AutonomicLab_Setup_*.exe
             dist/UserGuide-${{ github.ref_name }}.pdf
 
+  build-linux:
+    runs-on: ubuntu-22.04
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y libgl1 libegl1 libxcb-cursor0
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Set version from tag
+        run: |
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+          sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" autonomiclab/__init__.py
+
+      - name: Build binary
+        run: |
+          pyinstaller --clean --onefile --windowed --name AutonomicLab \
+            --add-data "autonomiclab/config/fonts.yaml:autonomiclab/config" \
+            --hidden-import bcrypt \
+            --hidden-import cryptography \
+            --hidden-import cryptography.hazmat.primitives.kdf.pbkdf2 \
+            --hidden-import cryptography.hazmat.backends.openssl \
+            --exclude-module matplotlib \
+            --exclude-module pandas \
+            --exclude-module tkinter \
+            autonomiclab/__main__.py
+
+      - name: Assemble release package
+        env:
+          USERS_DB_TOKEN: ${{ secrets.USERS_DB_READ_TOKEN }}
+        run: |
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+          pkg="AutonomicLab-linux-x86_64-${version}"
+          mkdir -p "dist/${pkg}"
+
+          cp dist/AutonomicLab        "dist/${pkg}/AutonomicLab"
+          cp assets/autonomiclab_splash.png "dist/${pkg}/autonomiclab_splash.png"
+
+          cat > "dist/${pkg}/config.yaml" << EOF
+          # AutonomicLab configuration
+          # Edit data_folder to match the location of your Finapres data.
+          data_folder: "~/Documents/AutonomicLab/data"
+
+          users_db_token: "${{ secrets.USERS_DB_READ_TOKEN }}"
+          allow_guest: true
+          EOF
+
+          cat > "dist/${pkg}/INSTALL.md" << 'EOF'
+          # AutonomicLab — Linux Installation
+
+          ## Quick start
+
+          1. Unzip this archive to a folder of your choice, e.g. `~/Applications/AutonomicLab/`
+          2. Make the binary executable:
+             ```
+             chmod +x AutonomicLab
+             ```
+          3. Run:
+             ```
+             ./AutonomicLab
+             ```
+
+          All three files (`AutonomicLab`, `config.yaml`, `autonomiclab_splash.png`)
+          must remain in the same directory.
+
+          ## Data folder
+
+          Place your Finapres dataset folders inside:
+
+              ~/Documents/AutonomicLab/data/
+
+          This default can be changed by editing `data_folder:` in `config.yaml`.
+
+          ## First run
+
+          If no user accounts exist yet the login dialog is skipped — go directly to
+          **Admin → Manage Users…** to create the first account. Once saved, the account
+          is synced to GitHub and immediately active on all other installations.
+
+          ## Log file
+
+          `autonomiclab.log` is written next to the binary on each run.
+          EOF
+
+          cd dist
+          zip -r "${pkg}.zip" "${pkg}/"
+
+      - name: Upload package to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AutonomicLab-linux-x86_64-*.zip
