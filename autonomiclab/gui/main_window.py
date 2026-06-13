@@ -298,11 +298,27 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
         help_menu = menu_bar.addMenu("Help")
         guide_action = help_menu.addAction("User Guide")
-        guide_action.triggered.connect(
-            lambda: QDesktopServices.openUrl(
+        guide_action.triggered.connect(self._open_user_guide)
+
+    def _open_user_guide(self) -> None:
+        import sys
+        from pathlib import Path
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtGui import QDesktopServices
+
+        # Prefer the PDF bundled next to the executable (works offline).
+        # Fall back to the GitHub releases page when no local copy exists.
+        if getattr(sys, "frozen", False):
+            pdf = Path(sys.executable).parent / "UserGuide.pdf"
+        else:
+            pdf = Path(__file__).parent.parent.parent / "UserGuide.pdf"
+
+        if pdf.exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(pdf)))
+        else:
+            QDesktopServices.openUrl(
                 QUrl("https://github.com/John-H-Aal/autonomiclab/releases/latest")
             )
-        )
 
         if auth_session.is_admin():
             admin_menu = menu_bar.addMenu("Admin")

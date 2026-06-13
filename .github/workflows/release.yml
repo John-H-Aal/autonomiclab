@@ -133,7 +133,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install system dependencies
-        run: sudo apt-get install -y libgl1 libegl1 libxcb-cursor0
+        run: sudo apt-get install -y libgl1 libegl1 libxcb-cursor0 pandoc wkhtmltopdf
 
       - name: Install Python dependencies
         run: |
@@ -145,6 +145,12 @@ jobs:
           version="${{ github.ref_name }}"
           version="${version#v}"
           sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" autonomiclab/__init__.py
+
+      - name: Generate PDF user guide
+        run: |
+          cd docs
+          pandoc user_guide.md -o "../dist/UserGuide.pdf" --pdf-engine=wkhtmltopdf --css user_guide.css
+        continue-on-error: true
 
       - name: Build binary
         run: |
@@ -170,6 +176,7 @@ jobs:
 
           cp dist/AutonomicLab              "dist/${pkg}/AutonomicLab"
           cp assets/autonomiclab_splash.png "dist/${pkg}/autonomiclab_splash.png"
+          [ -f dist/UserGuide.pdf ] && cp dist/UserGuide.pdf "dist/${pkg}/UserGuide.pdf" || true
 
           cat > "dist/${pkg}/config.yaml" << EOF
           # AutonomicLab configuration
@@ -195,8 +202,8 @@ jobs:
              ./AutonomicLab
              ```
 
-          All three files (`AutonomicLab`, `config.yaml`, `autonomiclab_splash.png`)
-          must remain in the same directory.
+          All files must remain in the same directory.
+          `UserGuide.pdf` can be opened from **Help → User Guide** inside the app.
 
           ## Data folder
 
