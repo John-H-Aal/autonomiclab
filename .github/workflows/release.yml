@@ -91,6 +91,13 @@ jobs:
           Copy-Item "dist/UserGuide.pdf" "dist/UserGuide-${{ github.ref_name }}.pdf"
         continue-on-error: true
 
+      - name: Upload PDF artifact for Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: user-guide-pdf
+          path: dist/UserGuide.pdf
+          if-no-files-found: ignore
+
       - name: Create installer config template
         run: |
           @"
@@ -121,7 +128,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-22.04
-    needs: create-release
+    needs: [create-release, build-windows]
 
     steps:
       - name: Checkout repository
@@ -133,7 +140,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install system dependencies
-        run: sudo apt-get install -y libgl1 libegl1 libxcb-cursor0 pandoc wkhtmltopdf
+        run: sudo apt-get install -y libgl1 libegl1 libxcb-cursor0
 
       - name: Install Python dependencies
         run: |
@@ -159,10 +166,11 @@ jobs:
             --exclude-module tkinter \
             autonomiclab/__main__.py
 
-      - name: Generate PDF user guide
-        run: |
-          mkdir -p dist
-          pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+      - name: Download PDF user guide from Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: user-guide-pdf
+          path: dist/
         continue-on-error: true
 
       - name: Assemble release package
