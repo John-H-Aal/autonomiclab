@@ -106,6 +106,11 @@ def main() -> int:
         # Try to pull a fresher users.db from GitHub (silently skipped offline).
         if settings.users_db_token:
             sync_users_db(settings.users_db_token, db_path)
+        else:
+            log.warning(
+                "users_db_token not set in config.yaml — "
+                "user database sync disabled; add the token to enable login"
+            )
 
         store   = UserStore(db_path)
         counter = GuestCounterStore(counter_path)
