@@ -30,6 +30,7 @@ class EscapeCloseMixin:
         msg = QMessageBox(self)
         msg.setWindowTitle("Close window")
         msg.setText("Close this window?")
+        msg.setMinimumWidth(380)
         msg.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )

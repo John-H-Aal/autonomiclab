@@ -358,6 +358,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         choice = QMessageBox(self)
         choice.setWindowTitle("Open Dataset")
         choice.setText("What do you want to open?")
+        choice.setMinimumWidth(380)
         csv_btn = choice.addButton("CSV Folder", QMessageBox.ButtonRole.AcceptRole)
         nsc_btn = choice.addButton(".nsc File", QMessageBox.ButtonRole.AcceptRole)
         choice.addButton(QMessageBox.StandardButton.Cancel)

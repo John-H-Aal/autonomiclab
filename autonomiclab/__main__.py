@@ -94,7 +94,6 @@ def main() -> int:
             Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint,
         )
         splash.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        splash.show()
         screen = app.primaryScreen()
         if screen:
             geo = screen.geometry()
@@ -102,6 +101,7 @@ def main() -> int:
                 geo.center().x() - pixmap.width() // 2,
                 geo.center().y() - pixmap.height() // 2,
             )
+        splash.show()
         app.processEvents()
 
     def launch():
