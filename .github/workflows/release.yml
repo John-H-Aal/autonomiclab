@@ -18,9 +18,19 @@ jobs:
       - name: Run tests
         run: pytest
 
+  create-release:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create GitHub release
+        run: gh release create ${{ github.ref_name }} --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build-windows:
     runs-on: windows-latest
-    needs: test
+    needs: create-release
 
     steps:
       - name: Checkout repository
@@ -100,16 +110,18 @@ jobs:
             iscc /DAppVersion=$version /DUsersDbToken=$token installer.iss
           }
 
-      - name: Upload installer to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/AutonomicLab_Setup_*.exe
-            dist/UserGuide-${{ github.ref_name }}.pdf
+      - name: Upload to release
+        shell: bash
+        run: |
+          gh release upload ${{ github.ref_name }} dist/AutonomicLab_Setup_*.exe
+          ls "dist/UserGuide-${{ github.ref_name }}.pdf" 2>/dev/null && \
+            gh release upload ${{ github.ref_name }} "dist/UserGuide-${{ github.ref_name }}.pdf" || true
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   build-linux:
     runs-on: ubuntu-22.04
-    needs: test
+    needs: create-release
 
     steps:
       - name: Checkout repository
@@ -156,7 +168,7 @@ jobs:
           pkg="AutonomicLab-linux-x86_64-${version}"
           mkdir -p "dist/${pkg}"
 
-          cp dist/AutonomicLab        "dist/${pkg}/AutonomicLab"
+          cp dist/AutonomicLab              "dist/${pkg}/AutonomicLab"
           cp assets/autonomiclab_splash.png "dist/${pkg}/autonomiclab_splash.png"
 
           cat > "dist/${pkg}/config.yaml" << EOF
@@ -164,7 +176,7 @@ jobs:
           # Edit data_folder to match the location of your Finapres data.
           data_folder: "~/Documents/AutonomicLab/data"
 
-          users_db_token: "${{ secrets.USERS_DB_READ_TOKEN }}"
+          users_db_token: "$USERS_DB_TOKEN"
           allow_guest: true
           EOF
 
@@ -208,7 +220,7 @@ jobs:
           cd dist
           zip -r "${pkg}.zip" "${pkg}/"
 
-      - name: Upload package to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/AutonomicLab-linux-x86_64-*.zip
+      - name: Upload to release
+        run: gh release upload ${{ github.ref_name }} dist/AutonomicLab-linux-x86_64-*.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
