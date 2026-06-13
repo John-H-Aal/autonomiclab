@@ -51,6 +51,15 @@ def _find_splash_image() -> Path | None:
 
 
 def main() -> int:
+    # On Linux/Wayland the compositor controls window placement and ignores
+    # any move() calls made by the application.  Force the xcb (X11/XWayland)
+    # platform so QSplashScreen can be centred and minimum dialog widths are
+    # respected by the window manager.  Users who explicitly need native
+    # Wayland mode can override this with QT_QPA_PLATFORM=wayland.
+    import os
+    if sys.platform != "win32":
+        os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+
     log_file = _log_path()
     configure_root_logger(log_file=log_file)
 
