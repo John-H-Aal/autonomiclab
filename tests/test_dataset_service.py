@@ -48,11 +48,11 @@ def test_nsc_load_returns_dataset(svc, nsc_file):
     assert len(ds.signals) > 0
 
 
-def test_nsc_load_has_no_markers(svc, nsc_file):
-    """NSC format carries no protocol event annotations."""
+def test_nsc_load_markers_are_lists(svc, nsc_file):
+    """markers and region_markers are always well-typed (may be empty for un-analysed files)."""
     ds = svc.load_nsc(nsc_file)
-    assert ds.markers == []
-    assert ds.region_markers == {}
+    assert isinstance(ds.markers, list)
+    assert isinstance(ds.region_markers, dict)
 
 
 def test_nsc_load_prefix_is_stem(svc, nsc_file):
