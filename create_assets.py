@@ -75,75 +75,6 @@ def draw_ecg(draw, x0, x1, mid_y, h, lw, color):
     )
     draw.line(pts, fill=color, width=lw, joint="curve")
 
-
-# ── icon ──────────────────────────────────────────────────────────────────────
-
-def draw_icon(size: int) -> Image.Image:
-    s   = size
-    lw  = max(2, round(s / 26))       # consistent line width
-
-    img  = Image.new("RGBA", (s, s), WHITE + (255,))
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, s, s], fill=WHITE)
-
-    # Monitor square: top-left, ~73% of image
-    sq0  = round(s * 0.07)
-    sq1  = round(s * 0.76)
-    rad  = round(s * 0.07)
-    draw.rounded_rectangle([sq0, sq0, sq1, sq1],
-                            radius=rad, fill=WHITE, outline=RED, width=lw)
-
-    # ECG inside the square
-    pad  = round(s * 0.12)
-    ecg_x0  = sq0 + pad
-    ecg_x1  = sq1 - pad // 2
-    ecg_mid = round((sq0 + sq1) / 2) - round(s * 0.03)
-    ecg_h   = round((sq1 - sq0) * 0.36)
-    draw_ecg(draw, ecg_x0, ecg_x1, ecg_mid, ecg_h, lw, RED)
-
-    # Heart: bottom-right, overlapping square corner
-    hcx    = round(s * 0.720)
-    hcy    = round(s * 0.740)
-    hscale = s * 0.014
-
-    draw_heart_outline(draw, hcx, hcy, hscale, lw, RED, WHITE)
-
-    return img
-
-
-def _build_ico(images: dict) -> bytes:
-    """Build a Windows ICO file with PNG data per size (Vista+ compatible)."""
-    import io, struct
-    entries = []
-    for size in sorted(images):
-        buf = io.BytesIO()
-        images[size].convert("RGBA").save(buf, format="PNG", optimize=False)
-        entries.append((size, buf.getvalue()))
-
-    n = len(entries)
-    header = struct.pack("<HHH", 0, 1, n)
-    offset = 6 + n * 16
-    dir_part = b""
-    for size, data in entries:
-        w = 0 if size == 256 else size   # 0 means 256 in ICO spec
-        dir_part += struct.pack("<BBBBHHII",
-                                w, w, 0, 0, 1, 32, len(data), offset)
-        offset += len(data)
-    return header + dir_part + b"".join(d for _, d in entries)
-
-
-def make_icon():
-    base  = draw_icon(512).convert("RGBA")
-    imgs  = {s: base.resize((s, s), Image.LANCZOS)
-             for s in [16, 32, 48, 64, 128, 256]}
-
-    with open("assets/autonomiclab.ico", "wb") as f:
-        f.write(_build_ico(imgs))
-
-    imgs[256].save("autonomiclab_icon_preview.png")
-    print("icon  → assets/autonomiclab.ico")
-
-
 # ── splash ────────────────────────────────────────────────────────────────────
 
 def make_splash():
@@ -179,5 +110,4 @@ def make_splash():
 
 
 if __name__ == "__main__":
-    make_icon()
     make_splash()
