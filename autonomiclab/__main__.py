@@ -65,6 +65,12 @@ def main() -> int:
 
     app = QApplication(sys.argv)
 
+    # Use Qt's built-in Fusion style on Linux so appearance is consistent
+    # across distributions (Fedora, Ubuntu, etc.) regardless of the installed
+    # GTK/Adwaita theme.  Custom setStyleSheet() calls remain in effect on top.
+    if sys.platform != "win32":
+        app.setStyle("Fusion")
+
     splash_path = _find_splash_image()
     splash = None
     if splash_path:
@@ -89,6 +95,13 @@ def main() -> int:
         )
         splash.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         splash.show()
+        screen = app.primaryScreen()
+        if screen:
+            geo = screen.geometry()
+            splash.move(
+                geo.center().x() - pixmap.width() // 2,
+                geo.center().y() - pixmap.height() // 2,
+            )
         app.processEvents()
 
     def launch():
