@@ -81,11 +81,6 @@ class AppSettings:
         return _DEFAULT_DATA_FOLDER
 
     @property
-    def allowed_users(self) -> list[str]:
-        """List of allowed usernames, or empty list to allow everyone."""
-        return self._config.get("allowed_users") or []
-
-    @property
     def users_db_token(self) -> str:
         """GitHub Personal Access Token for users.db sync. Empty = no sync."""
         return self._config.get("users_db_token") or ""

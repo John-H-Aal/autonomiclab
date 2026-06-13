@@ -105,6 +105,7 @@ class AppController:
 
         has_ecg = any(self._state.dataset.has_signal(k) for k in _ECG_SIGNALS)
         self._w.set_ecg_enabled(has_ecg)
+        self._w.set_pdf_enabled(False)
         self._w.set_plot_stack_index(1)
         self._w.show_message(
             f"✓  {self._state.dataset.path.name}"
@@ -134,6 +135,12 @@ class AppController:
 
         has_ecg = any(self._state.dataset.has_signal(k) for k in _ECG_SIGNALS)
         self._w.set_ecg_enabled(has_ecg)
+
+        import zipfile
+        with zipfile.ZipFile(nsc_path) as _zf:
+            has_pdf = any(n.lower().endswith(".pdf") for n in _zf.namelist())
+        self._w.set_pdf_enabled(has_pdf)
+
         self._w.set_plot_stack_index(1)
         self._w.show_message(
             f"✓  {nsc_path.name}"
@@ -221,8 +228,8 @@ class AppController:
                     )
                     st.last_protocol_key = protocol_key
                     st.last_result       = result
-                    self._w.set_export_enabled(True)
                     if protocol_key in ("valsalva", "deep breath"):
+                        self._w.set_export_enabled(True)
                         self._w.update_override_indicator(phase)
 
             self._w.register_plots()

@@ -86,15 +86,13 @@ class DatasetService:
         )
 
     def load_nsc(self, nsc_path: Path) -> Dataset:
-        """Load signals from a Finapres NOVA .nsc binary file.
-
-        Returns a Dataset with no markers or region_markers (the .nsc format
-        does not carry protocol event annotations).
-        """
+        """Load signals from a Finapres NOVA .nsc binary file."""
         nsc_path = Path(nsc_path)
         log.info("Loading NSC dataset from %s", nsc_path)
 
         signals = {}
+        markers = []
+        region_markers = {}
         with NscReader(nsc_path) as reader:
             available = set(reader.channels())
             for name in _NSC_SIGNALS:
@@ -108,12 +106,17 @@ class DatasetService:
                         log.debug("  ✓ %s (%d samples)", name, len(sig.times))
                 except Exception as exc:
                     log.warning("  ! %s failed: %s", name, exc)
+            markers = reader.read_markers()
+            region_markers = reader.read_region_markers()
 
-        log.info("NSC dataset ready: %d signals", len(signals))
+        log.info(
+            "NSC dataset ready: %d signals, %d markers, %d regions",
+            len(signals), len(markers), len(region_markers),
+        )
         return Dataset(
             path=nsc_path.parent,
             prefix=nsc_path.stem,
             signals=signals,
-            markers=[],
-            region_markers={},
+            markers=markers,
+            region_markers=region_markers,
         )

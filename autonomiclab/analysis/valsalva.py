@@ -97,7 +97,7 @@ class ValsalvaAnalyzer:
         t_vm1 = next(
             (m.time for m in window_markers if "vm1" in m.label.lower()), None
         )
-        t_anchor = t_vm1 if t_vm1 is not None else float(t_pa[0])
+        t_anchor = t_vm1 if t_vm1 is not None else (t_start if t_start is not None else float(t_pa[0]))
 
         # ── prefer manually placed "M Phase X" markers where available ─────────
         def _m(label_fragment: str) -> Optional[float]:

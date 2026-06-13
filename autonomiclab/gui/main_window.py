@@ -11,8 +11,8 @@ import sys
 from pathlib import Path
 
 import pyqtgraph as pg
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QPalette
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QColor, QDesktopServices, QPalette
 from PyQt6.QtWidgets import (
     QApplication, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel,
     QMainWindow, QMessageBox, QPushButton, QSplitter, QStackedWidget,
@@ -83,6 +83,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
 
         FontLoader.load()
         self._settings = AppSettings()
+        FontLoader.set_zoom(self._settings.ui_zoom)
         self._state    = AppState()
 
         self._init_ui()
@@ -140,6 +141,15 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
             _SECONDARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
         )
         left_layout.addWidget(self.ecg_button)
+
+        self.pdf_button = QPushButton("View Embedded PDF")
+        self.pdf_button.setMinimumHeight(36)
+        self.pdf_button.setEnabled(False)
+        self.pdf_button.clicked.connect(self._show_pdf)
+        self.pdf_button.setStyleSheet(
+            _SECONDARY_BTN.format(size=btn_font["size"], weight=btn_font["weight"])
+        )
+        left_layout.addWidget(self.pdf_button)
 
         self.status_label = QLabel("No dataset loaded")
         self.status_label.setStyleSheet(
@@ -349,7 +359,7 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         choice.setWindowTitle("Open Dataset")
         choice.setText("What do you want to open?")
         csv_btn = choice.addButton("CSV Folder", QMessageBox.ButtonRole.AcceptRole)
-        nsc_btn = choice.addButton(".nsc File",  QMessageBox.ButtonRole.AcceptRole)
+        nsc_btn = choice.addButton(".nsc File", QMessageBox.ButtonRole.AcceptRole)
         choice.addButton(QMessageBox.StandardButton.Cancel)
         choice.exec()
         clicked = choice.clickedButton()
@@ -486,6 +496,9 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
     def set_ecg_enabled(self, enabled: bool) -> None:
         self.ecg_button.setEnabled(enabled)
 
+    def set_pdf_enabled(self, enabled: bool) -> None:
+        self.pdf_button.setEnabled(enabled)
+
     def set_plot_stack_index(self, index: int) -> None:
         self._plot_stack.setCurrentIndex(index)
 
@@ -498,6 +511,29 @@ class MainWindow(EscapeCloseMixin, QMainWindow):
         if self._state.dataset:
             self._raw_win = RawDataWindow(self._state.dataset, parent=self)
             self._raw_win.show()
+
+    # ── embedded PDF ──────────────────────────────────────────────────────────
+
+    def _show_pdf(self) -> None:
+        import tempfile, zipfile
+        ds = self._state.dataset
+        if not ds:
+            return
+        nsc_path = ds.path / (ds.prefix + ".nsc")
+        try:
+            with zipfile.ZipFile(nsc_path) as zf:
+                pdf_entry = next((n for n in zf.namelist() if n.lower().endswith(".pdf")), None)
+                if not pdf_entry:
+                    return
+                pdf_bytes = zf.read(pdf_entry)
+        except Exception as exc:
+            log.warning("Could not read PDF from %s: %s", nsc_path, exc)
+            return
+        tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+        tmp.write(pdf_bytes)
+        tmp.flush()
+        tmp.close()
+        QDesktopServices.openUrl(QUrl.fromLocalFile(tmp.name))
 
 
 def main() -> int:

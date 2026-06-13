@@ -219,8 +219,9 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
                     size=6,
                 ), ignoreBounds=True)
 
-            if len(sig.values):
-                v_min, v_max = float(sig.values.min()), float(sig.values.max())
+            valid = sig.values[~np.isnan(sig.values)]
+            if len(valid):
+                v_min, v_max = float(valid.min()), float(valid.max())
                 span = v_max - v_min if v_max != v_min else abs(v_max) * 0.1 or 1.0
                 pad  = span * 0.20
                 pw.setYRange(v_min - pad, v_max + pad)
@@ -237,10 +238,11 @@ class RawDataWindow(EscapeCloseMixin, QDialog):
         if hr_ap and hr_ecg:
             t_ap  = hr_ap.times
             t_ecg = hr_ecg.times
-            ptt_ms = np.array([
-                (t_ap[i] - t_ecg[int(np.argmin(np.abs(t_ecg - t_ap[i])))]) * 1000.0
-                for i in range(len(t_ap))
-            ])
+            idx = np.searchsorted(t_ecg, t_ap).clip(0, len(t_ecg) - 1)
+            idx_left = np.maximum(idx - 1, 0)
+            use_left = np.abs(t_ecg[idx_left] - t_ap) < np.abs(t_ecg[idx] - t_ap)
+            idx[use_left] = idx_left[use_left]
+            ptt_ms = (t_ap - t_ecg[idx]) * 1000.0
             pw = pg.PlotWidget(title="PTT", parent=self._plot_container)
             self._style_pw(pw)
             pw.showGrid(x=True, y=True, alpha=0.3)
