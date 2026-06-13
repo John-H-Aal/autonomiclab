@@ -146,12 +146,6 @@ jobs:
           version="${version#v}"
           sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" autonomiclab/__init__.py
 
-      - name: Generate PDF user guide
-        run: |
-          cd docs
-          pandoc user_guide.md -o "../dist/UserGuide.pdf" --pdf-engine=wkhtmltopdf --css user_guide.css
-        continue-on-error: true
-
       - name: Build binary
         run: |
           pyinstaller --clean --onefile --windowed --name AutonomicLab \
@@ -164,6 +158,12 @@ jobs:
             --exclude-module pandas \
             --exclude-module tkinter \
             autonomiclab/__main__.py
+
+      - name: Generate PDF user guide
+        run: |
+          mkdir -p dist
+          pandoc docs/user_guide.md -o dist/UserGuide.pdf --pdf-engine=wkhtmltopdf --css docs/user_guide.css
+        continue-on-error: true
 
       - name: Assemble release package
         env:

@@ -1,4 +1,4 @@
 """AutonomicLab - GAT Protocol Analysis Tool"""
-__version__ = "1.2.10"
+__version__ = "1.2.11"
 __author__ = "Astrid Juhl Terkelsen"
 __email__ = "astrid.terkelsen@clin.au.dk"
